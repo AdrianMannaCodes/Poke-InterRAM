@@ -1,13 +1,10 @@
 # Halloween Tasks Log (October 30, 2026)
 
-## 1. macOS 10.5 Leopard style icons
-- Generated icons in the macOS 10.5 Leopard visual style.
-
-## 2. Hogwarts Halloween crossword
+## 1. Hogwarts Halloween crossword
 - Discussed the concept of a Hogwarts-themed Halloween crossword.
 - Attempted to build the crossword.
 
-## 3. Sveta & Snape paper doll Halloween comic remake
+## 2. Sveta & Snape paper doll Halloween comic remake
 - Remade the Sveta & Snape paper doll Halloween comic.
 - Includes character details, generation prompt, and dialogue.
 
