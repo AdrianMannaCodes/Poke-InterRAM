@@ -30,9 +30,10 @@
   .clues { flex:1 1 320px; max-width:460px; }
   .clues h2 { font-family:"UnifrakturMaguntia", serif; color:var(--burg); font-size:1.9rem; margin:6px 0 4px; border-bottom:1px solid var(--gold); }
   .clues ol { list-style:none; padding:0; margin:0 0 14px; }
-  .clues li { margin:0 0 8px; line-height:1.3; font-size:1.05rem; cursor:pointer; padding:3px 6px; border-radius:4px; }
+  .clues li { margin:0 0 8px; line-height:1.3; font-size:1.05rem; cursor:pointer; padding:3px 6px; border-radius:4px; display:flex; align-items:center; gap:8px; }
   .clues li:hover, .clues li.active { background:rgba(138,109,29,.18); }
-  .clues li b { color:var(--burg); }
+  .clues li b { color:var(--burg); min-width:1.6em; }
+  .clues li .emoji { font-size:2.1rem; line-height:1; filter:drop-shadow(1px 1px 0 #fff6d8); }
   .clues li .len { font-style:italic; color:#6a5130; }
   .controls { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:22px; }
   button { font-family:"IM Fell English", Georgia, serif; font-size:1.05rem; padding:8px 18px; border-radius:8px; border:2px solid var(--gold);
@@ -48,6 +49,7 @@
     .controls, #status, footer { display:none !important; }
     .cell input.ok, .cell input.bad { background:transparent; color:#000; }
     .clues li:hover, .clues li.active { background:none; }
+    .clues li .emoji { filter:none; }
     .layout { gap:12px; }
     button { display:none; }
   }
@@ -81,16 +83,16 @@
 
 <script>
 const WORDS = [
-  { answer:"GLOVES", row:9,  col:1, dir:"A", clue:"Keep your fingers toasty warm on a snowy day at Hogwarts!" },
-  { answer:"BOOT",   row:11, col:0, dir:"A", clue:"You wear these big, sturdy shoes when it rains or snows, and they go squish in puddles." },
-  { answer:"SCARF",  row:7,  col:5, dir:"A", clue:"A long, cozy strip you wrap around your neck to stay warm." },
-  { answer:"PANTS",  row:2,  col:0, dir:"A", clue:"You wear these on your legs. Jeans are one kind!" },
-  { answer:"DRESS",  row:5,  col:3, dir:"A", clue:"A one-piece outfit that goes from your shoulders down past your knees." },
-  { answer:"COAT",   row:8,  col:3, dir:"D", clue:"A big warm layer you zip or button up over everything else when it is chilly outside." },
-  { answer:"SOCKS",  row:5,  col:6, dir:"D", clue:"Soft cozy things you pull onto your feet before you put on your shoes." },
-  { answer:"CAP",    row:0,  col:0, dir:"D", clue:"A hat with a bendy brim at the front, like a baseball player wears." },
-  { answer:"SHIRT",  row:2,  col:4, dir:"D", clue:"You wear this on your top half, often with buttons down the front." },
-  { answer:"HAT",    row:0,  col:3, dir:"D", clue:"Something you put on your head to keep it warm or shady from the sun." }
+  { answer:"GLOVES", row:9,  col:1, dir:"A", clue:"\u{1F9E4}" },
+  { answer:"BOOT",   row:11, col:0, dir:"A", clue:"\u{1F462}" },
+  { answer:"SCARF",  row:7,  col:5, dir:"A", clue:"\u{1F9E3}" },
+  { answer:"PANTS",  row:2,  col:0, dir:"A", clue:"\u{1F456}" },
+  { answer:"DRESS",  row:5,  col:3, dir:"A", clue:"\u{1F457}" },
+  { answer:"COAT",   row:8,  col:3, dir:"D", clue:"\u{1F9E5}" },
+  { answer:"SOCKS",  row:5,  col:6, dir:"D", clue:"\u{1F9E6}" },
+  { answer:"CAP",    row:0,  col:0, dir:"D", clue:"\u{1F9E2}" },
+  { answer:"SHIRT",  row:2,  col:4, dir:"D", clue:"\u{1F455}" },
+  { answer:"HAT",    row:0,  col:3, dir:"D", clue:"\u{1F3A9}" }
 ];
 const ROWS = 12, COLS = 10;
 
@@ -137,7 +139,7 @@ const sorted = [...WORDS].sort((a,b)=> a.num-b.num);
 function addClue(w, el) {
   const li = document.createElement("li");
   li.dataset.key = w.answer;
-  li.innerHTML = `<b>${w.num}.</b> ${w.clue} <span class="len">(${w.answer.length})</span>`;
+  li.innerHTML = `<b>${w.num}.</b> <span class="emoji" role="img" aria-label="clue">${w.clue}</span> <span class="len">(${w.answer.length})</span>`;
   li.addEventListener("click", () => focusWord(w));
   el.appendChild(li);
 }
