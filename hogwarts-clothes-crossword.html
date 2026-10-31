@@ -81,18 +81,18 @@
 
 <script>
 const WORDS = [
-  { answer:"GLOVES", row:0, col:0,  dir:"A", clue:"Keep your fingers toasty warm on a snowy day at Hogwarts!" },
-  { answer:"BOOT",   row:0, col:7,  dir:"A", clue:"You wear these big, sturdy shoes when it rains or snows, and they go squish in puddles." },
-  { answer:"SCARF",  row:1, col:11, dir:"A", clue:"A long, cozy strip you wrap around your neck to stay warm." },
-  { answer:"PANTS",  row:2, col:0,  dir:"A", clue:"You wear these on your legs. Jeans are one kind!" },
-  { answer:"DRESS",  row:2, col:6,  dir:"A", clue:"A one-piece outfit that goes from your shoulders down past your knees." },
-  { answer:"COAT",   row:3, col:5,  dir:"D", clue:"A big warm layer you zip or button up over everything else when it is chilly outside." },
-  { answer:"SOCKS",  row:2, col:9,  dir:"D", clue:"Soft cozy things you pull onto your feet before you put on your shoes." },
-  { answer:"CAP",    row:3, col:11, dir:"D", clue:"A hat with a bendy brim at the front, like a baseball player wears." },
-  { answer:"SHIRT",  row:4, col:0,  dir:"D", clue:"You wear this on your top half, often with buttons down the front." },
-  { answer:"HAT",    row:4, col:2,  dir:"D", clue:"Something you put on your head to keep it warm or shady from the sun." }
+  { answer:"GLOVES", row:9,  col:1, dir:"A", clue:"Keep your fingers toasty warm on a snowy day at Hogwarts!" },
+  { answer:"BOOT",   row:11, col:0, dir:"A", clue:"You wear these big, sturdy shoes when it rains or snows, and they go squish in puddles." },
+  { answer:"SCARF",  row:7,  col:5, dir:"A", clue:"A long, cozy strip you wrap around your neck to stay warm." },
+  { answer:"PANTS",  row:2,  col:0, dir:"A", clue:"You wear these on your legs. Jeans are one kind!" },
+  { answer:"DRESS",  row:5,  col:3, dir:"A", clue:"A one-piece outfit that goes from your shoulders down past your knees." },
+  { answer:"COAT",   row:8,  col:3, dir:"D", clue:"A big warm layer you zip or button up over everything else when it is chilly outside." },
+  { answer:"SOCKS",  row:5,  col:6, dir:"D", clue:"Soft cozy things you pull onto your feet before you put on your shoes." },
+  { answer:"CAP",    row:0,  col:0, dir:"D", clue:"A hat with a bendy brim at the front, like a baseball player wears." },
+  { answer:"SHIRT",  row:2,  col:4, dir:"D", clue:"You wear this on your top half, often with buttons down the front." },
+  { answer:"HAT",    row:0,  col:3, dir:"D", clue:"Something you put on your head to keep it warm or shady from the sun." }
 ];
-const ROWS = 9, COLS = 16;
+const ROWS = 12, COLS = 10;
 
 const sol = Array.from({length:ROWS}, () => Array(COLS).fill(null));
 const conflicts = [];
