@@ -17,3 +17,13 @@ Type: Image / Print-ready 2D layout (JPEG, 3:2 landscape)
 Details: Flat top-down view for printing, vertical perforated tear-off line separating main ticket and stub, personalized for Sveta, Platform 9 3/4, London to Hogwarts.
 
 Date: November 10, 2026, 11:30 PM GMT+3
+
+---
+
+Asset: Final Print-Ready Hogwarts Express Ticket (Gold Foil & Stub)
+Media ID: 73c05435-5df3-4c25-8cd1-2ef0054d855f
+Type: Image / Print-ready 2D layout (JPEG, 3:2 landscape)
+
+Details: Direct top-down flat print-ready layout on clean plain background; ornate gold foil embossing and Victorian filigree; vertical perforated tear-off line separating main ticket from right stub; passenger "SVETA", date "24 NOVEMBER 2026", Platform 9 ¾, London to Hogwarts.
+
+Date: November 10, 2026, 11:33 PM GMT+3
