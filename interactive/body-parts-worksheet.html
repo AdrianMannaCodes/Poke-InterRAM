@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Body Parts Worksheet - Welcome Back to the Magic School</title>
+<style>
+  :root{--ink:#3b2a14;--gold:#d4a017;--gold-light:#ffd95a;--red:#740001;--red-light:#a51c1e;--parchment:#f6e7bf;}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;font-family:"Trebuchet MS","Segoe UI",Arial,sans-serif;color:var(--ink);
+    background:radial-gradient(circle at 50% 0%,#fff6d6 0%,var(--parchment) 45%,#e9cf8e 100%);
+    display:flex;flex-direction:column;align-items:center;padding:16px}
+  h1{margin:0 0 4px;font-size:clamp(1.5rem,4vw,2.2rem);color:var(--red);text-align:center}
+  .sub{margin:0 0 12px;text-align:center}
+  .layout{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;align-items:flex-start;width:100%;max-width:960px}
+  .stage{position:relative;width:min(420px,90vw);border-radius:20px;overflow:hidden;border:4px solid var(--gold);
+    box-shadow:0 0 0 4px var(--red),0 14px 30px rgba(60,30,0,.35);background:#fff}
+  .stage img{display:block;width:100%;height:auto}
+  .pin{position:absolute;width:40px;height:40px;border-radius:50%;transform:translate(-50%,-50%);
+    border:3px solid #fff;cursor:pointer;padding:0;z-index:3;
+    background:radial-gradient(circle at 35% 30%,#fff8c8,var(--gold) 60%,#8a6408);
+    animation:glow 1.8s infinite}
+  .pin:hover,.pin:focus-visible{transform:translate(-50%,-50%) scale(1.2);outline:none}
+  .pin.hit{background:radial-gradient(circle,#fff,#7dff9a 60%,#1f9d4a)}
+  .pin.wrong{animation:shake .4s}
+  @keyframes glow{0%{box-shadow:0 0 0 0 rgba(255,217,90,.9)}70%{box-shadow:0 0 0 14px rgba(255,217,90,0)}100%{box-shadow:0 0 0 0 rgba(255,217,90,0)}}
+  @keyframes shake{0%,100%{transform:translate(-50%,-50%)}25%{transform:translate(-60%,-50%)}75%{transform:translate(-40%,-50%)}}
+  .toolbar{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:12px 0}
+  .btn{border:none;border-radius:999px;padding:12px 22px;font-size:1rem;font-weight:700;cursor:pointer;color:#fff;
+    background:linear-gradient(180deg,var(--red-light),var(--red));box-shadow:0 5px 0 #4a0001,0 8px 14px rgba(0,0,0,.25)}
+  .btn.on{background:linear-gradient(180deg,#ffe27a,var(--gold));color:var(--red)}
+  .card-wrap{width:min(360px,90vw);min-height:240px}
+  .card{background:linear-gradient(180deg,#fffdf4,#f9ebc0);border:3px solid var(--gold);border-radius:22px;padding:20px;
+    box-shadow:0 0 0 4px var(--red),0 12px 26px rgba(0,0,0,.3);text-align:center}
+  .card .word{font-size:2.4rem;font-weight:900;color:var(--red);margin:0;font-family:Georgia,serif}
+  .card .ipa{font-size:1.3rem;margin:6px 0 10px}
+  .syl{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .syl span{background:#fff;border:2px solid var(--gold);border-radius:12px;padding:6px 10px}
+  .example{background:var(--red);color:#fff;border-radius:14px;padding:12px;font-style:italic;line-height:1.4}
+  .idle{text-align:center;padding:20px;border:2px dashed var(--gold);border-radius:18px;background:#fffbea}
+  .quiz-box{background:#fffbea;border:3px dashed var(--gold);border-radius:18px;padding:12px 16px;text-align:center;width:min(420px,90vw);margin-top:12px}
+  .quiz-word{font-size:1.8rem;font-weight:800}
+  .hidden{display:none}
+  .calib{font-family:monospace;font-size:.9rem;background:#222;color:#0f0;padding:8px;border-radius:8px;margin-top:10px;width:min(420px,90vw);word-break:break-all}
+</style>
+</head>
+<body>
+<header>
+  <h1>Body Parts with Hermione Granger</h1>
+  <p class="sub">Tap a glowing gold pin to hear the word, or try Quiz Mode!</p>
+</header>
+
+<div class="toolbar">
+  <button class="btn" id="quizBtn" aria-pressed="false">Quiz Mode: Find the Body Part</button>
+  <button class="btn" id="replayBtn">Hear it again</button>
+</div>
+
+<div class="layout">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+    <div class="stage" id="stage">
+      <img id="diagram" src="https://user56062.na.imgto.link/public/20261114/4b8a427aacaea9c124416cd6-img-9048.avif" alt="Diagram of Hermione Granger in a Gryffindor uniform with body parts labeled: Head, Eyes, Ears, Shoulder, Arm, Elbow, Hand, Knee, Leg, Foot">
+      <!-- Pins use % of the image width (left) and height (top). Adjust with ?calibrate in the URL. -->
+      <button class="pin" data-id="head" aria-label="Head" style="left:50%;top:8%"></button>
+      <button class="pin" data-id="eyes" aria-label="Eyes" style="left:42%;top:15%"></button>
+      <button class="pin" data-id="ears" aria-label="Ears" style="left:58%;top:15%"></button>
+      <button class="pin" data-id="shoulder" aria-label="Shoulder" style="left:35%;top:25%"></button>
+      <button class="pin" data-id="arm" aria-label="Arm" style="left:70%;top:38%"></button>
+      <button class="pin" data-id="elbow" aria-label="Elbow" style="left:75%;top:50%"></button>
+      <button class="pin" data-id="hand" aria-label="Hand" style="left:18%;top:85%"></button>
+      <button class="pin" data-id="knee" aria-label="Knee" style="left:40%;top:68%"></button>
+      <button class="pin" data-id="leg" aria-label="Leg" style="left:62%;top:72%"></button>
+      <button class="pin" data-id="foot" aria-label="Foot or Feet" style="left:60%;top:92%"></button>
+    </div>
+    <div class="quiz-box hidden" id="quizBox">
+      <div>Tap the:</div>
+      <div class="quiz-word" id="quizWord">HEAD</div>
+      <div id="score">Stars: 0</div>
+    </div>
+    <div class="calib hidden" id="calib"></div>
+  </div>
+
+  <div class="card-wrap" id="cardWrap">
+    <div class="idle" id="idle">Tap a pin on Hermione to discover a body word!</div>
+    <div class="card hidden" id="card" role="dialog" aria-live="polite">
+      <p class="word" id="cWord"></p>
+      <div class="ipa" id="cIpa"></div>
+      <div class="syl" id="cSyl"></div>
+      <div class="example" id="cEx"></div>
+      <button class="btn" id="cReplay" style="margin-top:12px">Hear it again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const WORDS = {
+  head:{word:"Head",ipa:"/hed/",syl:[["head","/hed/","short e"]],ex:"Hermione bumped her head on a low doorway, but Madam Pomfrey fixed it in a second!"},
+  eyes:{word:"Eyes",ipa:"/aɪz/",syl:[["eyes","/aɪz/","long i sound"]],ex:"Hermione's sharp eyes spotted a hidden clue in the library!"},
+  ears:{word:"Ears",ipa:"/ɪəz/",syl:[["ears","/ɪəz/","ear sound"]],ex:"Hermione pressed her ears to the door to hear the password."},
+  shoulder:{word:"Shoulder",ipa:"/ˈʃəʊldə/",syl:[["shoul","/ˈʃəʊl/","stressed"],["der","/də/","unstressed"]],ex:"Crookshanks rested on Hermione's shoulder while she read."},
+  arm:{word:"Arm",ipa:"/ɑːm/",syl:[["arm","/ɑːm/","long a sound"]],ex:"Hermione raised her arm high to answer Professor McGonagall's question."},
+  elbow:{word:"Elbow",ipa:"/ˈelbəʊ/",syl:[["el","/ˈel/","stressed"],["bow","/bəʊ/","unstressed"]],ex:"Hermione rested her elbow on an old spell book."},
+  hand:{word:"Hand",ipa:"/hænd/",syl:[["hand","/hænd/","short a sound"]],ex:"Hermione's hand shot up in class faster than anyone else's!"},
+  knee:{word:"Knee",ipa:"/niː/",syl:[["knee","/niː/","long e sound"]],ex:"Madam Pomfrey healed Hermione's knee with a flick of her wand!"},
+  leg:{word:"Leg",ipa:"/leg/",syl:[["leg","/leg/","short e sound"]],ex:"Hermione's leg ached after she climbed the Astronomy Tower."},
+  foot:{word:"Foot / Feet",ipa:"/fʊt/ or /fiːt/",syl:[["foot","/fʊt/","one foot"],["feet","/fiːt/","two feet"]],ex:"Hermione kept both feet safely on the moving staircase!"}
+};
+const ORDER = Object.keys(WORDS);
+
+let gbVoice = null;
+function pickVoice(){const vs=window.speechSynthesis?speechSynthesis.getVoices():[];gbVoice=vs.find(v=>v.lang==="en-GB"&&/female|google uk|daniel|serena|kate/i.test(v.name))||vs.find(v=>v.lang==="en-GB")||null;}
+if("speechSynthesis" in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
+function speak(text){if(!("speechSynthesis" in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang="en-GB";u.rate=0.82;u.pitch=1.05;if(gbVoice)u.voice=gbVoice;speechSynthesis.speak(u);}
+
+const $=id=>document.getElementById(id);
+function showCard(id){
+  const w=WORDS[id];
+  $("idle").classList.add("hidden");
+  const card=$("card");
+  $("cWord").textContent=w.word;
+  $("cIpa").textContent=w.ipa;
+  $("cSyl").innerHTML=w.syl.map(s=>`<span><b>${s[0]}</b><br>${s[1]}<br><small>${s[2]}</small></span>`).join("");
+  $("cEx").textContent=w.ex;
+  card.classList.remove("hidden");
+  card.dataset.id=id;
+}
+
+let quizOn=false,target=null,stars=0;
+function nextQuestion(){
+  let pick;
+  do{pick=ORDER[Math.floor(Math.random()*ORDER.length)];}while(pick===target);
+  target=pick;
+  $("quizWord").textContent=WORDS[pick].word.toUpperCase();
+  speak(`Tap the ${WORDS[pick].word.split(" / ")[0].toLowerCase()}.`);
+}
+function setQuiz(on){
+  quizOn=on;
+  $("quizBtn").classList.toggle("on",on);
+  $("quizBtn").setAttribute("aria-pressed",on);
+  $("quizBox").classList.toggle("hidden",!on);
+  $("card").classList.add("hidden");
+  $("idle").classList.toggle("hidden",on);
+  if(on){stars=0;$("score").textContent="Stars: 0";nextQuestion();}else speechSynthesis&&speechSynthesis.cancel();
+}
+
+document.querySelectorAll(".pin").forEach(pin=>{
+  pin.addEventListener("click",e=>{
+    const id=pin.dataset.id;
+    if(!quizOn){showCard(id);speak(WORDS[id].word.split(" / ")[0]);return;}
+    if(id===target){
+      pin.classList.add("hit");stars++;$("score").textContent=`Stars: ${stars}`;
+      speak("Excellent! Well done!");
+      setTimeout(()=>{pin.classList.remove("hit");nextQuestion();},1800);
+    }else{
+      pin.classList.remove("wrong");void pin.offsetWidth;pin.classList.add("wrong");
+      speak("Not quite. Try again!");
+    }
+  });
+});
+
+$("quizBtn").addEventListener("click",()=>setQuiz(!quizOn));
+$("replayBtn").addEventListener("click",()=>{const id=$("card").dataset.id;if(id)speak(WORDS[id].word.split(" / ")[0]);});
+$("cReplay").addEventListener("click",()=>{const id=$("card").dataset.id;if(id)speak(WORDS[id].word.split(" / ")[0]);});
+
+// Calibration helper: open with ?calibrate, then tap the diagram to read exact % coordinates.
+if(new URLSearchParams(location.search).has("calibrate")){
+  $("calib").classList.remove("hidden");
+  $("stage").addEventListener("click",e=>{
+    const r=$("stage").getBoundingClientRect();
+    const x=((e.clientX-r.left)/r.width*100).toFixed(1), y=((e.clientY-r.top)/r.height*100).toFixed(1);
+    $("calib").textContent=`left:${x}%;top:${y}%`;
+  });
+}
+</script>
+</body>
+</html>
