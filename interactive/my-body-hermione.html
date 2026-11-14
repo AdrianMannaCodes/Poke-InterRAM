@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Body with Hermione Granger</title>
+<style>
+  :root{
+    --parchment:#f6e7bf; --parchment-dark:#e9cf8e; --ink:#3b2a14;
+    --gold:#d4a017; --gold-light:#ffd95a; --red:#740001; --red-light:#a51c1e;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh; font-family:"Trebuchet MS","Segoe UI",Arial,sans-serif; color:var(--ink);
+    background:radial-gradient(circle at 50% 0%, #fff6d6 0%, var(--parchment) 45%, var(--parchment-dark) 100%);
+    display:flex; flex-direction:column; align-items:center; padding:16px;
+  }
+  header{text-align:center; margin-bottom:8px}
+  h1{margin:0; font-size:clamp(1.6rem,4vw,2.4rem); color:var(--red); text-shadow:0 2px 0 var(--gold-light)}
+  .sub{margin:4px 0 0; font-size:1rem}
+  .toolbar{display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin:14px 0}
+  .btn{
+    border:none; border-radius:999px; padding:12px 22px; font-size:1rem; font-weight:700; cursor:pointer; color:#fff;
+    background:linear-gradient(180deg,var(--red-light),var(--red)); box-shadow:inset 0 2px 0 rgba(255,255,255,.35), 0 5px 0 #4a0001, 0 8px 14px rgba(0,0,0,.25);
+    transition:transform .1s;
+  }
+  .btn:active{transform:translateY(3px); box-shadow:inset 0 2px 0 rgba(255,255,255,.35), 0 2px 0 #4a0001}
+  .btn.on{background:linear-gradient(180deg,#ffe27a,var(--gold)); color:var(--red); box-shadow:inset 0 2px 0 rgba(255,255,255,.6), 0 5px 0 #8a6408, 0 8px 14px rgba(0,0,0,.25)}
+  .layout{display:flex; gap:24px; flex-wrap:wrap; justify-content:center; align-items:flex-start; width:100%; max-width:960px}
+
+  /* Figure stage */
+  .stage{
+    position:relative; width:min(360px,88vw); aspect-ratio:4/7; border-radius:24px; padding:10px;
+    background:linear-gradient(160deg,#fff4cc,#f0d68a); border:4px solid var(--gold);
+    box-shadow:0 0 0 4px var(--red), 0 14px 30px rgba(60,30,0,.35);
+  }
+  .stage svg{width:100%; height:100%; display:block}
+  .quiz-box{
+    margin-top:0; background:#fffbea; border:3px dashed var(--gold); border-radius:18px; padding:14px 18px;
+    width:min(360px,88vw); text-align:center; box-shadow:0 6px 16px rgba(0,0,0,.15);
+  }
+  .quiz-box h2{margin:0 0 6px; font-size:1.1rem; color:var(--red)}
+  .quiz-word{font-size:2rem; font-weight:800; color:var(--ink)}
+  .quiz-ipa{font-size:1.2rem; color:#7a5a1e}
+  .score{margin-top:6px; font-weight:700}
+
+  /* Pins */
+  .pin{
+    position:absolute; width:34px; height:34px; border-radius:50%; transform:translate(-50%,-50%);
+    border:3px solid #fff; cursor:pointer; padding:0;
+    background:radial-gradient(circle at 35% 30%, #fff8c8, var(--gold) 60%, #8a6408);
+    box-shadow:0 0 0 0 rgba(255,217,90,.9); animation:glow 1.8s infinite;
+    z-index:3;
+  }
+  .pin:hover,.pin:focus-visible{transform:translate(-50%,-50%) scale(1.2); outline:none}
+  .pin::after{
+    content:attr(data-label); position:absolute; left:50%; top:-30px; transform:translateX(-50%);
+    background:var(--red); color:#fff; font-size:.8rem; font-weight:700; padding:3px 8px; border-radius:10px;
+    white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .2s;
+  }
+  .pin:hover::after,.pin:focus-visible::after{opacity:1}
+  .pin.knee{width:46px; height:46px; border-color:var(--red); animation:glowBig 1.2s infinite}
+  .pin.knee::before{
+    content:"KNEE"; position:absolute; left:50%; bottom:-26px; transform:translateX(-50%);
+    background:var(--red); color:var(--gold-light); font-size:.7rem; font-weight:800; padding:2px 6px; border-radius:8px; letter-spacing:1px;
+  }
+  .pin.wrong{animation:shake .4s}
+  @keyframes glow{0%{box-shadow:0 0 0 0 rgba(255,217,90,.9)}70%{box-shadow:0 0 0 14px rgba(255,217,90,0)}100%{box-shadow:0 0 0 0 rgba(255,217,90,0)}}
+  @keyframes glowBig{0%{box-shadow:0 0 0 0 rgba(116,0,1,.8),0 0 18px #ffd95a}70%{box-shadow:0 0 0 18px rgba(116,0,1,0),0 0 28px #ffd95a}100%{box-shadow:0 0 0 0 rgba(116,0,1,0),0 0 18px #ffd95a}}
+  @keyframes shake{0%,100%{transform:translate(-50%,-50%)}25%{transform:translate(-60%,-50%)}75%{transform:translate(-40%,-50%)}}
+  .pin.hit{background:radial-gradient(circle,#fff,#7dff9a 60%,#1f9d4a); border-color:#fff}
+
+  /* Particles */
+  .spark{position:absolute; pointer-events:none; z-index:6; font-size:20px; color:var(--gold-light);
+    text-shadow:0 0 6px #ffd95a; animation:fly 1s ease-out forwards; transform:translate(-50%,-50%)}
+  @keyframes fly{to{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) rotate(260deg) scale(.3); opacity:0}}
+
+  /* Card */
+  .card-wrap{width:min(360px,88vw); min-height:260px}
+  .card{
+    background:linear-gradient(180deg,#fffdf4,#f9ebc0); border:3px solid var(--gold); border-radius:22px; padding:20px;
+    box-shadow:0 0 0 4px var(--red), 0 12px 26px rgba(0,0,0,.3); text-align:center;
+    animation:pop .45s cubic-bezier(.2,1.4,.4,1);
+  }
+  @keyframes pop{from{transform:scale(.6) rotate(-4deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+  .card .word{font-size:clamp(2.2rem,7vw,3rem); font-weight:900; color:var(--red); margin:0; font-family:Georgia,serif}
+  .card .ipa{font-size:1.4rem; color:#6b4b10; margin:6px 0 10px}
+  .syl{display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:10px}
+  .syl span{background:#fff; border:2px solid var(--gold); border-radius:12px; padding:6px 10px; font-size:.95rem}
+  .syl b{color:var(--red); font-size:1.15rem}
+  .type{font-size:.9rem; font-weight:700; color:#5a3f0c; margin-bottom:10px}
+  .example{background:var(--red); color:#fff; border-radius:14px; padding:12px; font-style:italic; font-size:1.02rem; line-height:1.4}
+  .replay{margin-top:12px}
+  .hidden{display:none}
+  .idle{font-size:1rem; text-align:center; padding:20px; border:2px dashed var(--gold); border-radius:18px; background:#fffbea}
+</style>
+</head>
+<body>
+<header>
+  <h1>My Body with Hermione Granger</h1>
+  <p class="sub">Tap a glowing gold pin to hear the word, or try Quiz Mode!</p>
+</header>
+
+<div class="toolbar">
+  <button class="btn" id="quizBtn" aria-pressed="false">Quiz Mode: Spell Test / Find the Body Part</button>
+  <button class="btn" id="replayBtn">Hear it again</button>
+</div>
+
+<div class="layout">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+    <div class="stage" id="stage">
+      <svg viewBox="0 0 400 700" aria-label="Hermione Granger in Gryffindor uniform">
+        <defs>
+          <linearGradient id="robe" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#5a0001"/><stop offset=".5" stop-color="#9e1416"/><stop offset="1" stop-color="#5a0001"/>
+          </linearGradient>
+          <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fbe0c6"/><stop offset="1" stop-color="#f0c39c"/>
+          </linearGradient>
+          <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffe27a"/><stop offset="1" stop-color="#c8900c"/>
+          </linearGradient>
+          <radialGradient id="hair" cx=".4" cy=".35" r=".7">
+            <stop offset="0" stop-color="#b87a3c"/><stop offset="1" stop-color="#5a3414"/>
+          </radialGradient>
+        </defs>
+        <!-- Ground glow -->
+        <ellipse cx="200" cy="675" rx="130" ry="14" fill="rgba(90,50,10,.25)"/>
+        <!-- Legs -->
+        <path d="M170 400 L165 470 L172 622" stroke="#f0c39c" stroke-width="34" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M230 400 L232 470 L228 622" stroke="#f0c39c" stroke-width="34" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Shoes -->
+        <ellipse cx="172" cy="640" rx="24" ry="11" fill="#3b2213"/>
+        <ellipse cx="228" cy="640" rx="24" ry="11" fill="#3b2213"/>
+        <!-- Left arm -->
+        <path d="M140 170 L115 300 L120 380" stroke="url(#robe)" stroke-width="30" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="120" cy="388" r="14" fill="url(#skin)"/>
+        <!-- Skirt -->
+        <path d="M128 330 L272 330 L282 412 L118 412 Z" fill="url(#robe)"/>
+        <!-- Torso -->
+        <path d="M140 150 L260 150 L276 335 L124 335 Z" fill="url(#robe)"/>
+        <!-- Collar and tie -->
+        <path d="M172 150 L200 185 L228 150 Z" fill="#f4f0e6"/>
+        <polygon points="200,170 213,182 200,262 187,182" fill="url(#gold)" stroke="#8a6408" stroke-width="1.5"/>
+        <!-- Crest -->
+        <path d="M150 190 h22 v20 q0 14 -11 18 q-11 -4 -11 -18 z" fill="url(#gold)" stroke="#8a6408" stroke-width="1.5"/>
+        <text x="161" y="210" font-size="13" text-anchor="middle" fill="#740001" font-family="Georgia,serif" font-weight="bold">G</text>
+        <!-- Right arm -->
+        <path d="M262 165 L318 300 L330 382" stroke="url(#robe)" stroke-width="30" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="330" cy="390" r="15" fill="url(#skin)"/>
+        <!-- Neck -->
+        <rect x="186" y="118" width="28" height="36" fill="url(#skin)"/>
+        <!-- Ears -->
+        <ellipse cx="160" cy="98" rx="8" ry="13" fill="#f0c39c"/>
+        <ellipse cx="240" cy="98" rx="8" ry="13" fill="#f0c39c"/>
+        <!-- Face -->
+        <ellipse cx="200" cy="98" rx="40" ry="44" fill="url(#skin)"/>
+        <!-- Bushy hair -->
+        <path d="M134 98 C124 40 170 18 200 22 C232 18 276 40 266 98 C272 124 262 132 258 110 C250 60 220 48 200 52 C180 48 150 60 142 110 C138 132 128 124 134 98 Z" fill="url(#hair)"/>
+        <path d="M150 60 C170 40 230 40 252 62" stroke="#8a5424" stroke-width="5" fill="none" stroke-linecap="round" opacity=".6"/>
+        <!-- Hair ribbon -->
+        <path d="M236 40 l12 -8 l0 16 z M236 40 l12 8 l0 -16 z" fill="url(#gold)"/>
+        <!-- Eyes, smile -->
+        <ellipse cx="186" cy="100" rx="4.5" ry="5.5" fill="#2b1a0c"/>
+        <ellipse cx="214" cy="100" rx="4.5" ry="5.5" fill="#2b1a0c"/>
+        <circle cx="187.5" cy="98" r="1.5" fill="#fff"/>
+        <circle cx="215.5" cy="98" r="1.5" fill="#fff"/>
+        <path d="M186 120 Q200 132 214 120" stroke="#a0392a" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <!-- Cheeks -->
+        <circle cx="176" cy="116" r="6" fill="#ff9a8a" opacity=".5"/>
+        <circle cx="224" cy="116" r="6" fill="#ff9a8a" opacity=".5"/>
+        <!-- Glossy highlight on robe -->
+        <path d="M150 170 L152 320" stroke="rgba(255,255,255,.12)" stroke-width="10" stroke-linecap="round"/>
+      </svg>
+
+      <!-- Hotspots (x/400, y/700 converted to %) -->
+      <button class="pin" data-id="head"     data-label="Head"       style="left:50%;top:calc(28/700*100%)"></button>
+      <button class="pin" data-id="eyes"     data-label="Eyes"       style="left:calc(214/400*100%);top:calc(100/700*100%)"></button>
+      <button class="pin" data-id="ears"     data-label="Ears"       style="left:calc(240/400*100%);top:calc(98/700*100%)"></button>
+      <button class="pin" data-id="shoulder" data-label="Shoulder"   style="left:calc(262/400*100%);top:calc(160/700*100%)"></button>
+      <button class="pin" data-id="arm"      data-label="Arm"        style="left:calc(296/400*100%);top:calc(235/700*100%)"></button>
+      <button class="pin" data-id="elbow"    data-label="Elbow"      style="left:calc(318/400*100%);top:calc(300/700*100%)"></button>
+      <button class="pin" data-id="hand"     data-label="Hand"       style="left:calc(330/400*100%);top:calc(390/700*100%)"></button>
+      <button class="pin knee" data-id="knee" data-label="Knee"      style="left:calc(230/400*100%);top:calc(470/700*100%)"></button>
+      <button class="pin" data-id="leg"      data-label="Leg"        style="left:calc(232/400*100%);top:calc(540/700*100%)"></button>
+      <button class="pin" data-id="foot"     data-label="Foot / Feet" style="left:calc(228/400*100%);top:calc(645/700*100%)"></button>
+    </div>
+    <div class="quiz-box hidden" id="quizBox">
+      <h2>Spell Test: Find the Body Part</h2>
+      <div>Click on Hermione's:</div>
+      <div class="quiz-word" id="quizWord">KNEE</div>
+      <div class="quiz-ipa" id="quizIpa">[ni�]</div>
+      <div class="score" id="score">Stars collected: 0</div>
+    </div>
+  </div>
+
+  <div class="card-wrap" id="cardWrap">
+    <div class="idle" id="idle">Tap a pin on Hermione to discover a body word!</div>
+    <div class="card hidden" id="card" role="dialog" aria-live="polite">
+      <p class="word" id="cWord"></p>
+      <div class="ipa" id="cIpa"></div>
+      <div class="syl" id="cSyl"></div>
+      <div class="type" id="cType"></div>
+      <div class="example" id="cEx"></div>
+      <button class="btn replay" id="cReplay">Hear it again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Word data: IPA, syllable breakdown, vowel type, Hogwarts example sentence.
+const WORDS = {
+  head: {
+    word:"Head", ipa:"/hed/",
+    syl:[{txt:"head", ipa:"/hed/", vowel:"e", type:"Short vowel /e/"}],
+    type:"One syllable, short vowel sound /e/",
+    ex:"Hermione bumped her head on a low Hogwarts doorway, but Madam Pomfrey fixed it in a second!"
+  },
+  eyes: {
+    word:"Eyes", ipa:"/ajz/",
+    syl:[{txt:"eyes", ipa:"/ajz/", vowel:"aj", type:"Diphthong /aj/ (glide from a to i)"}],
+    type:"One syllable, diphthong vowel /aj/",
+    ex:"Hermione's sharp eyes spotted a hidden clue in the Restricted Section of the library!"
+  },
+  ears: {
+    word:"Ears", ipa:"/jYz/",
+    syl:[{txt:"ears", ipa:"/jYz/", vowel:"jY", type:"Centring diphthong /jY/"}],
+    type:"One syllable, centring diphthong /jY/",
+    ex:"Hermione pressed her ears to the door to hear the secret password of the Gryffindor common room."
+  },
+  shoulder: {
+    word:"Shoulder", ipa:"/ʃ̃�ld̃/",
+    syl:[{txt:"shoul", ipa:"ʃ̃�l", vowel:"�", type:"Stressed diphthong /�/"},
+         {txt:"der",   ipa:"d̃", vowel:"̃", type:"Unstressed schwa /̃/"}],
+    type:"Two syllables, stress on the first: diphthong /�/ then schwa /̃/",
+    ex:"Crookshanks jumped up and rested on Hermione's shoulder while she read her favourite book."
+  },
+  arm: {
+    word:"Arm", ipa:"/�m/",
+    syl:[{txt:"arm", ipa:"/�m/", vowel:"�", type:"Long vowel /�/"}],
+    type:"One syllable, long vowel /�/",
+    ex:"Hermione raised her arm high to answer Professor McGonagall's question in Transfiguration."
+  },
+  elbow: {
+    word:"Elbow", ipa:"/�elb̃�/",
+    syl:[{txt:"el", ipa:"�el", vowel:"e", type:"Short vowel /e/"},
+         {txt:"bow", ipa:"b̃�", vowel:"�", type:"Diphthong /�/"}],
+    type:"Two syllables, stress on the first: short /e/ then diphthong /�/",
+    ex:"Hermione rested her elbow on an old spell book and read until the candles burned low."
+  },
+  hand: {
+    word:"Hand", ipa:"/h�nd/",
+    syl:[{txt:"hand", ipa:"/h�nd/", vowel:"�", type:"Short vowel /�/"}],
+    type:"One syllable, short vowel /�/",
+    ex:"Hermione's hand shot up in class faster than anyone else's, as always!"
+  },
+  knee: {
+    word:"Knee", ipa:"/ni�/",
+    syl:[{txt:"knee", ipa:"/ni�/", vowel:"i�", type:"Long vowel /i�/"}],
+    type:"One syllable, long vowel /i�/ (the k is silent)",
+    ex:"Madam Pomfrey healed Hermione's knee with a flick of her wand!"
+  },
+  leg: {
+    word:"Leg", ipa:"/lea/",
+    syl:[{txt:"leg", ipa:"/lea/", vowel:"e", type:"Short vowel /e/"}],
+    type:"One syllable, short vowel /e/",
+    ex:"Hermione's leg ached after she climbed all the way up the Astronomy Tower."
+  },
+  foot: {
+    word:"Foot / Feet", ipa:"/f�t/ � /fi�t/",
+    syl:[{txt:"foot", ipa:"/f�t/", vowel:"�", type:"Short vowel /�/ (one foot)"},
+         {txt:"feet", ipa:"/fi�t/", vowel:"i�", type:"Long vowel /i�/ (two feet)"}],
+    type:"One foot: short /�/. Two feet: long /i�/.",
+    ex:"Hermione kept one foot on the staircase and one foot on the moving stairs, and both feet landed safely!"
+  }
+};
+const ORDER = Object.keys(WORDS);
+
+// ---------- Speech (British English) ----------
+let gbVoice = null;
+function pickVoice(){
+  const vs = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+  gbVoice = vs.find(v => v.lang === "en-GB" && /female|google uk|daniel|serena|kate/i.test(v.name))
+         || vs.find(v => v.lang === "en-GB") || null;
+}
+if ("speechSynthesis" in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speak(text){
+  if (!("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "en-GB"; u.rate = 0.82; u.pitch = 1.05;
+  if (gbVoice) u.voice = gbVoice;
+  speechSynthesis.speak(u);
+}
+
+// ---------- Hogwarts celebration sound (synthesized, no files) ----------
+let audioCtx = null;
+function chime(){
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+    notes.forEach((f,i)=>{
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = "triangle"; o.frequency.value = f;
+      const t = audioCtx.currentTime + i*0.11;
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.exponentialRampToValueAtTime(0.25,t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+0.5);
+      o.connect(g).connect(audioCtx.destination);
+      o.start(t); o.stop(t+0.55);
+    });
+  }catch(e){}
+}
+
+// ---------- Particles (stars / sparks) ----------
+function sparkle(pin){
+  const stage = document.getElementById("stage");
+  const sx = pin.offsetLeft, sy = pin.offsetTop;
+  const symbols = ["&","","'","("];
+  for (let i=0;i<22;i++){
+    const s = document.createElement("span");
+    s.className = "spark";
+    s.textContent = symbols[i % symbols.length];
+    s.style.left = sx+"px"; s.style.top = sy+"px";
+    const ang = Math.random()*Math.PI*2, d = 60+Math.random()*90;
+    s.style.setProperty("--dx", Math.cos(ang)*d+"px");
+    s.style.setProperty("--dy", Math.sin(ang)*d+"px");
+    s.style.color = ["#ffd95a","#fff","#ffb300","#ff7ab8"][i%4];
+    s.style.animationDelay = (Math.random()*0.15)+"s";
+    stage.appendChild(s);
+    setTimeout(()=>s.remove(), 1300);
+  }
+}
+
+// ---------- Learn mode card ----------
+const $ = id => document.getElementById(id);
+function showCard(id){
+  const w = WORDS[id];
+  $("idle").classList.add("hidden");
+  const card = $("card");
+  card.classList.add("hidden");
+  void card.offsetWidth; // restart animation
+  $("cWord").textContent = w.word;
+  $("cIpa").textContent = w.ipa;
+  $("cSyl").innerHTML = w.syl.map(s =>
+    `<span><b>${s.txt}</b><br>${s.ipa}<br><small>${s.type}</small></span>`).join("");
+  $("cType").textContent = w.type;
+  $("cEx").textContent = w.ex;
+  card.classList.remove("hidden");
+  card.dataset.id = id;
+}
+
+// ---------- Quiz mode ----------
+let quizOn = false, target = null, stars = 0;
+function nextQuestion(){
+  let pick;
+  do { pick = ORDER[Math.floor(Math.random()*ORDER.length)]; } while (pick === target && ORDER.length > 1);
+  target = pick;
+  const w = WORDS[pick];
+  $("quizWord").textContent = pick === "foot" ? "FOOT / FEET" : w.word.toUpperCase();
+  $("quizIpa").textContent = `[${w.syl.map(s=>s.ipa.replace(/[\/]/g,"")).join(" / ")}]`;
+  speak(`Click on Hermione's ${pick === "foot" ? "foot" : w.word.toLowerCase()}.`);
+}
+function setQuiz(on){
+  quizOn = on;
+  const b = $("quizBtn");
+  b.classList.toggle("on", on);
+  b.setAttribute("aria-pressed", on);
+  $("quizBox").classList.toggle("hidden", !on);
+  $("card").classList.add("hidden");
+  $("idle").classList.toggle("hidden", on);
+  $("replayBtn").classList.toggle("hidden", on);
+  if (on){ stars = 0; $("score").textContent = "Stars collected: 0"; nextQuestion(); }
+  else speechSynthesis && speechSynthesis.cancel();
+}
+
+// ---------- Wiring ----------
+document.querySelectorAll(".pin").forEach(pin=>{
+  pin.addEventListener("click", ()=>{
+    const id = pin.dataset.id;
+    if (!quizOn){
+      showCard(id);
+      speak(WORDS[id].word.split(" / ")[0]);
+      return;
+    }
+    if (id === target){
+      pin.classList.add("hit");
+      sparkle(pin); chime();
+      stars++;
+      $("score").textContent = `Stars collected: ${stars}`;
+      speak("Excellent! Well done!");
+      setTimeout(()=>{ pin.classList.remove("hit"); nextQuestion(); }, 2000);
+    } else {
+      pin.classList.remove("wrong"); void pin.offsetWidth; pin.classList.add("wrong");
+      speak("Not quite. Try again!");
+    }
+  });
+});
+$("quizBtn").addEventListener("click", ()=> setQuiz(!quizOn));
+$("replayBtn").addEventListener("click", ()=>{
+  const id = $("card").dataset.id; if (id) speak(WORDS[id].word.split(" / ")[0]);
+});
+$("cReplay").addEventListener("click", ()=>{
+  const id = $("card").dataset.id; if (id) speak(WORDS[id].word.split(" / ")[0]);
+});
+</script>
+</body>
+</html>
