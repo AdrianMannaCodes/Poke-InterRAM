@@ -223,6 +223,7 @@
     cursor: grab;
     touch-action: none;
     user-select: none; -webkit-user-select: none;
+    -webkit-touch-callout: none; -webkit-user-drag: none;
     box-shadow: 0 3px 0 #b8861b, 0 4px 8px rgba(0,0,0,.25);
     transition: transform .15s ease, box-shadow .15s ease, opacity .2s ease;
   }
@@ -232,6 +233,8 @@
     box-shadow: 0 0 0 4px var(--gold), 0 0 16px #fff3c4, 0 3px 0 #b8861b;
   }
   .tile.dragging { opacity: .35; }
+  body.dragging-active { user-select: none; -webkit-user-select: none; cursor: grabbing; }
+  body.dragging-active * { cursor: grabbing !important; }
   .tile.used { opacity: .18; pointer-events: none; box-shadow: none; }
   .ghost {
     position: fixed; z-index: 999; pointer-events: none; margin: 0;
@@ -734,66 +737,126 @@
     return el ? el.closest('.slot') : null;
   }
 
-  function startDrag(tile, x, y) {
+  function startDrag(x, y) {
+    var tile = drag.tile;
     var ghost = tile.cloneNode(true);
     ghost.classList.add('ghost');
     ghost.classList.remove('selected', 'dragging');
+    ghost.removeAttribute('id');
+    ghost.setAttribute('aria-hidden', 'true');
     ghost.style.left = x + 'px';
     ghost.style.top = y + 'px';
     document.body.appendChild(ghost);
+    document.body.classList.add('dragging-active');
     tile.classList.add('dragging');
     drag.ghost = ghost;
     drag.active = true;
     clearSelection();
+    var sel = window.getSelection && window.getSelection();
+    if (sel && sel.removeAllRanges) sel.removeAllRanges();
   }
+
+  /* Remove ghost and drag state. Safe to call any number of times. */
   function endDrag() {
-    if (drag && drag.ghost && drag.ghost.parentNode) drag.ghost.parentNode.removeChild(drag.ghost);
-    if (drag && drag.tile) drag.tile.classList.remove('dragging');
+    if (!drag) return;
+    if (drag.ghost && drag.ghost.parentNode) drag.ghost.parentNode.removeChild(drag.ghost);
+    if (drag.tile) {
+      drag.tile.classList.remove('dragging');
+      try { drag.tile.releasePointerCapture(drag.id); } catch (err) { /* already released */ }
+    }
+    document.body.classList.remove('dragging-active');
     clearHover();
     drag = null;
   }
 
+  function moveDrag(e) {
+    if (!drag.active) {
+      if (Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < 8) return;
+      startDrag(e.clientX, e.clientY);
+    }
+    drag.lx = e.clientX;
+    drag.ly = e.clientY;
+    drag.ghost.style.left = e.clientX + 'px';
+    drag.ghost.style.top = e.clientY + 'px';
+    clearHover();
+    var s = slotAt(e.clientX, e.clientY);
+    if (s && !s.classList.contains('correct')) s.classList.add('hover');
+  }
+
+  /* Ends the current drag exactly once. cancelled = true means no letter is placed. */
+  function finishDrag(e, cancelled) {
+    if (!drag) return;
+    var d = drag;
+    var x = e ? e.clientX : d.lx;
+    var y = e ? e.clientY : d.ly;
+    var wasDragging = d.active;
+    endDrag();
+    if (cancelled) return;
+    if (wasDragging) {
+      var s = (x !== undefined && y !== undefined) ? slotAt(x, y) : null;
+      if (s) placeTile(d.tile, s);
+    } else {
+      if (selected === d.tile) {
+        clearSelection();
+      } else {
+        clearSelection();
+        selected = d.tile;
+        d.tile.classList.add('selected');
+        msgEl.textContent = 'Now tap a gap to place the letter.';
+      }
+    }
+  }
+
   function setupTile(tile) {
+    tile.setAttribute('draggable', 'false');
+    tile.addEventListener('contextmenu', function (e) { e.preventDefault(); });
     tile.addEventListener('pointerdown', function (e) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;   // left button only
       if (tile.classList.contains('used')) return;
-      e.preventDefault();
-      drag = { tile: tile, id: e.pointerId, sx: e.clientX, sy: e.clientY, active: false, ghost: null };
+      if (drag) endDrag();                                        // never let a stale drag block a new one
+      e.preventDefault();                                         // stops text selection and native drag start
+      drag = { tile: tile, id: e.pointerId, pointerType: e.pointerType,
+               sx: e.clientX, sy: e.clientY, lx: e.clientX, ly: e.clientY,
+               active: false, ghost: null };
       try { tile.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
     });
-    tile.addEventListener('pointermove', function (e) {
-      if (!drag || drag.tile !== tile || e.pointerId !== drag.id) return;
-      if (!drag.active) {
-        if (Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < 8) return;
-        startDrag(tile, e.clientX, e.clientY);
-      }
-      drag.ghost.style.left = e.clientX + 'px';
-      drag.ghost.style.top = e.clientY + 'px';
-      clearHover();
-      var s = slotAt(e.clientX, e.clientY);
-      if (s && !s.classList.contains('correct')) s.classList.add('hover');
-    });
-    tile.addEventListener('pointerup', function (e) {
-      if (!drag || drag.tile !== tile || e.pointerId !== drag.id) return;
-      var wasDragging = drag.active;
-      endDrag();
-      if (wasDragging) {
-        var s = slotAt(e.clientX, e.clientY);
-        if (s) placeTile(tile, s);
-      } else {
-        if (selected === tile) {
-          clearSelection();
-        } else {
-          clearSelection();
-          selected = tile;
-          tile.classList.add('selected');
-          msgEl.textContent = 'Now tap a gap to place the letter.';
-        }
-      }
-    });
-    tile.addEventListener('pointercancel', function () {
-      if (drag && drag.tile === tile) endDrag();
-    });
   }
+
+  /* Global tracking: works even if pointer capture is lost, the pointer leaves the
+     window, or the release happens outside the page. */
+  window.addEventListener('pointermove', function (e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    if (drag.pointerType === 'mouse' && e.buttons === 0) {     // button was released somewhere we missed
+      finishDrag(e, !drag.active);
+      return;
+    }
+    moveDrag(e);
+  });
+  window.addEventListener('pointerup', function (e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    finishDrag(e, false);
+  });
+  window.addEventListener('pointercancel', function (e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    finishDrag(null, true);
+  });
+  window.addEventListener('mouseup', function (e) {
+    if (drag && drag.pointerType === 'mouse') finishDrag(e, false);
+  });
+  // Capture was lost before the drag began: nothing to track, so cancel. Once dragging, window listeners carry on.
+  document.addEventListener('lostpointercapture', function (e) {
+    if (drag && e.pointerId === drag.id && !drag.active) finishDrag(null, true);
+  }, true);
+
+  // Block native drag, text selection and touch scrolling while a tile is being dragged.
+  document.addEventListener('dragstart', function (e) { e.preventDefault(); }, true);
+  document.addEventListener('dragend', function () { if (drag) finishDrag(null, true); }, true);
+  document.addEventListener('selectstart', function (e) { if (drag) e.preventDefault(); });
+  document.addEventListener('touchmove', function (e) { if (drag && drag.active) e.preventDefault(); }, { passive: false });
+
+  // Safety net: leaving the page, switching tabs or losing focus always clears the drag.
+  window.addEventListener('blur', function () { finishDrag(null, true); });
+  document.addEventListener('visibilitychange', function () { if (document.hidden) finishDrag(null, true); });
 
   function setupSlot(slot) {
     slot.addEventListener('click', function () {
@@ -838,7 +901,7 @@
 
   document.getElementById('btn-reset').addEventListener('click', function () {
     clearSelection();
-    endDrag();
+    finishDrag(null, true);
     score = 0;
     for (var i = 0; i < slots.length; i++) {
       slots[i].textContent = '';
