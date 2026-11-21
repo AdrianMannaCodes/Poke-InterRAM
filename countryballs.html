@@ -1,0 +1,1032 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+    <link rel="preconnect" href="https://assets.hark.com" crossorigin>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="https://assets.hark.com/fonts/GT-Standard-L-Standard-Regular.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="https://assets.hark.com/fonts/GT-Standard-L-Standard-Medium.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="https://assets.hark.com/fonts/GT-Standard-L-Standard-Semibold.woff2" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="theme-color" content="#000" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <style>
+        html,
+        body {
+            margin: 0
+        }
+ 
+        html {
+            min-height: calc(100% + env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px));
+            background: #000;
+            color-scheme: dark
+        }
+    </style>
+    <title>Hark</title>
+    <style>
+        body:has(>#sky-root) {
+            background: transparent
+        }
+ 
+        #sky-root {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: -1;
+            isolation: isolate;
+            contain: paint
+        }
+ 
+        #gl,
+        #skyfreeze {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            visibility: hidden
+        }
+ 
+        #skyph {
+            position: absolute;
+            inset: 0;
+            background: var(--sky-placeholder, none);
+            transition: opacity .8s ease
+        }
+ 
+        #glfail {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff80;
+            text-align: center;
+            padding: 24px;
+            font: 14px -apple-system, sans-serif
+        }
+ 
+        html[data-native-sky="1"] {
+            background: transparent !important
+        }
+ 
+        html[data-native-sky="1"] #sky-root {
+            display: none
+        }
+    </style>
+    <script type="module" crossorigin src="https://assets.hark.com/assets/main-BgvIFRyi.js"></script>
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/9JiRbi51.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/dHPN2nOX.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/BokmawJI.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/BnrdqUZ5.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/DUzblOX6.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/LOtvrtQj.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/ChiH03gR.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/DaUKnpLf.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/qOQT4W8l.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/Cb0MAXOQ.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/BJvakwRj.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/BxysVeCF.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/Dz6mZZH3.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/C73zTjj8.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/DCr4VMUu.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/DUdwfkM6.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/D-iAkVUc.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/CuTx26Xa.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/HcxH5_8L.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/BETlBSKW.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/sBNZMA2P.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/BT1Iz7Ci.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/DAevVvxR.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/DY8c16Vs.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/BpJeahOD.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/DzeMwxic.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/B9bBJQ7Z.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/Dxeemh5U.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/B5Xma3jR.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/k_XQYzMa.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/DUE8NTE1.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/CMh7_Dhe.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/D5PcU9iX.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/CMUFb_Zd.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/0XPGnzk9.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/DA5lVK1j.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/sh5Zzo_t.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/CvhjboHD.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/CTzlVYCj.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/DoQS2TNJ.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/X9IvPMVQ.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/CKmHvg7f.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/D_mqtp2-.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/CLbaA9VN.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/DO6Idphd.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/BMUtc7P4.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/CmXf2yhv.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/DE6GYcCu.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/Da8Dv92P.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/BGmuDAFX.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/LMJHLeyt.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/BSi9RULV.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/I3WHmP4e.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/EkW1A7AX.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/O1TG4Y1-.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/BP42nNzW.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/sz-Ek-Fv.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/DeMg1Ekj.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/CErK07BQ.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/CcvutmVq.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/m2vsZufc.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/ClJ9IAHO.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/DadlotWN.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/CXgkewjd.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/CWUUHFoK.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/zw89LFew.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/CEk8wepc.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/Su3Uh1Mw.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/CFPKtC-Z.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/C7B96zRu.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/CBe6ywnd.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/-762cYra.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/Q45y1nv9.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/CdDlILo9.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/BcKwKwQP.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/D_ldKjAy.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/DKTBa-HG.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/D7PDysYb.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/BzfKz3kS.js">
+    <link rel="modulepreload" crossorigin href="https://assets.hark.com/assets/VtdnGwYI.js">
+    <link rel="stylesheet" crossorigin href="https://assets.hark.com/assets/CMWgDkxc.css">
+    <link rel="stylesheet" crossorigin href="https://assets.hark.com/assets/MlxsXr9h.css">
+    <link rel="stylesheet" crossorigin href="https://assets.hark.com/assets/-H_MNQ72.css">
+    <link rel="stylesheet" crossorigin href="https://assets.hark.com/assets/CJcsgDhh.css">
+    <link rel="stylesheet" crossorigin href="https://assets.hark.com/assets/C3GS93_6.css">
+    <link rel="stylesheet" crossorigin href="https://assets.hark.com/assets/B4SnSMaH.css">
+    <link rel="stylesheet" crossorigin href="https://assets.hark.com/assets/BhZIgmfH.css">
+    <link rel="stylesheet" crossorigin href="https://assets.hark.com/assets/DUsvynQs.css">
+    <link rel="stylesheet" crossorigin href="https://assets.hark.com/assets/DZNTyHHY.css">
+    <link rel="stylesheet" crossorigin href="https://assets.hark.com/assets/BI4RvnFb.css">
+    <link rel="stylesheet" crossorigin href="https://assets.hark.com/assets/Cyvwxpm-.css">
+    <link rel="stylesheet" crossorigin href="https://assets.hark.com/assets/tUQw2_vF.css">
+    <link rel="stylesheet" crossorigin href="https://assets.hark.com/assets/C-E6Ns4i.css">
+    <link rel="stylesheet" crossorigin href="https://assets.hark.com/assets/Ga6pzfge.css">
+    <link rel="stylesheet" crossorigin href="https://assets.hark.com/assets/gZEuGhXF.css">
+    <link rel="stylesheet" crossorigin href="https://assets.hark.com/assets/B8uSjWSC.css">
+    <link rel="stylesheet" crossorigin href="https://assets.hark.com/assets/Bo8jWtyR.css">
+    <link rel="stylesheet" crossorigin href="https://assets.hark.com/assets/DRg19VOE.css">
+    <link rel="stylesheet" crossorigin href="https://assets.hark.com/assets/BcxrBYAw.css">
+    <link rel="stylesheet" crossorigin href="https://assets.hark.com/assets/DvGvcZSP.css">
+    <meta name="hark-locale" content="en">
+ 
+    <meta name="hark-region" content="IN">
+    <script>
+        window.__HARK_RUNTIME_CONFIG__ = {
+            "environment": "prod",
+            "deployEnv": "prod",
+            "mixpanelEnvironment": "prod",
+            "version": "release-2026.11.19.1-euw1",
+            "mixpanelToken": "ef227962ae684bd98e6d4aa0c10ec75b",
+            "vaultUrl": "https://vault.hark.com",
+            "posthogKey": "phc_o7sEn88J2jjrhVCdhbMJVtPACbojpPwxWHocj9nASbe6",
+            "posthogHost": "https://api.hark.com/v1/flags",
+            "sentryDsn": "https://2b72ef3002e2bf3ec244ec81be7aa1f9@o4510648210358272.ingest.us.sentry.io/4511862215475200",
+            "ageCardVerificationEnabled": true,
+            "phoneSignUpEnabled": true,
+            "phoneCallingCodes": ["+63", "+44", "+971", "+1", "+27", "+31", "+33", "+39", "+41", "+45", "+46", "+48", "+49", "+51", "+52", "+55", "+56", "+57", "+61", "+62", "+64", "+65", "+81", "+82", "+90", "+91", "+244", "+254", "+263", "+266", "+267", "+351", "+358", "+372", "+503", "+505", "+506", "+507", "+591", "+595", "+598", "+966"],
+            "signUpPaused": false,
+            "signInPaused": false,
+            "imessageLoginEnabled": true,
+            "turnstileSiteKey": "0x4AAAAAAFh-rwDxyV7E4EEA",
+            "macAppBannerEnabled": true
+        }
+    </script>
+    <script type="application/json" id="__HARK_SITE_LINK__">
+        eyJwcm9qZWN0SWQiOiJjMDg0YWUyNi1iYjY4LTQ3OWItOTU5NC04MDU5YWI1ZTg0YWQiLCJyZWFkZXIiOiJzaWduZWQtb3V0IiwibGluayI6eyJzdGF0dXMiOjIwMCwiYm9keSI6eyJ1cmwiOiJodHRwczovL2hhcmsuc2l0ZS9zL2MwODRhZTI2LWJiNjgtNDc5Yi05NTk0LTgwNTlhYjVlODRhZC9pbmRleC5odG1sP2hhcmtfcmVnaW9uPWV1In19fQ ==
+    </script>
+    <script type="application/json" id="__HARK_SITE_HEADER__">
+        ZmFsc2U =
+    </script>
+</head>
+ 
+<body>
+    <script>
+        "use strict";
+        (() => {
+            var ye = Object.defineProperty;
+            var Se = (e, t, r) => t in e ? ye(e, t, {
+                enumerable: !0,
+                configurable: !0,
+                writable: !0,
+                value: r
+            }) : e[t] = r;
+            var o = (e, t, r) => Se(e, typeof t != "symbol" ? t + "" : t, r);
+            var s = {};
+            var ge = ["swiftshader", "llvmpipe", "softpipe", "basic render driver", "software renderer"],
+                ve = "WebKit WebGL";
+ 
+            function D(e) {
+                let t = I(e, e.RENDERER);
+                if (t !== ve) return t;
+                let r = e.getExtension("WEBGL_debug_renderer_info");
+                return r ? I(e, r.UNMASKED_RENDERER_WEBGL) : t
+            }
+ 
+            function O(e) {
+                let t = e.toLowerCase();
+                return ge.some(r => t.includes(r))
+            }
+ 
+            function I(e, t) {
+                let r = e.getParameter(t);
+                return typeof r == "string" ? r : ""
+            }
+ 
+            function N(e) {
+                let t = window,
+                    r = Object.create(t.webkit?.messageHandlers ?? null);
+                r.hark = {
+                    postMessage: e
+                }, t.webkit = {
+                    messageHandlers: r
+                }
+            }
+            var b = "__harkSky";
+ 
+            function F(e) {
+                return /<script>([\s\S]*?)<\/script>/i.exec(e)?.[1] ?? null
+            }
+ 
+            function K(e) {
+                let t = e.getContext.bind(e),
+                    r = (n, a) => {
+                        if (n !== "webgl" && n !== "webgl2") return t(n, a);
+                        let i = t(n, {
+                            ...a,
+                            preserveDrawingBuffer: !0
+                        });
+                        return i && we(i) && be(e, i), i && _e(i) ? Ce(e, i) : i
+                    };
+                e.getContext = r
+            }
+ 
+            function we(e) {
+                return "getParameter" in e && typeof e.getParameter == "function"
+            }
+ 
+            function be(e, t) {
+                let r = e;
+                r.__harkSkySoftware === void 0 && (r.__harkSkySoftware = O(D(t)))
+            }
+ 
+            function B(e) {
+                return e.__harkSkySoftware === !0
+            }
+ 
+            function _e(e) {
+                return "drawArrays" in e && typeof e.drawArrays == "function" && "drawElements" in e && typeof e.drawElements == "function"
+            }
+ 
+            function p(e) {
+                return e.__harkSkyDrawSerial ?? null
+            }
+ 
+            function Ce(e, t) {
+                let r = e;
+                r.__harkSkyDrawSerial = 0;
+                let n = r.__harkSkyDrawListeners ?? (r.__harkSkyDrawListeners = new Set),
+                    a = () => {
+                        r.__harkSkyDrawSerial = (r.__harkSkyDrawSerial ?? 0) + 1, n.forEach(c => c())
+                    },
+                    {
+                        drawArrays: i,
+                        drawElements: d
+                    } = t;
+                return t.drawArrays = (c, u, l) => {
+                    i.call(t, c, u, l), a()
+                }, t.drawElements = (c, u, l, S) => {
+                    d.call(t, c, u, l, S), a()
+                }, t
+            }
+            var Ee = {
+                wallpaperUrl: "/wallpaper_core.html",
+                apiBase: "",
+                storagePrefix: "hark"
+            };
+ 
+            function W(e) {
+                return {
+                    ...Ee,
+                    ...e
+                }
+            }
+ 
+            function f(e) {
+                return {
+                    themeOverride: `${e}-theme-override`,
+                    placeholder: `${e}-sky-placeholder-v2`,
+                    skyAppearance: `${e}-sky-appearance`,
+                    embedderTheme: `${e}-embedder-theme`
+                }
+            }
+            var Ae = "theme";
+ 
+            function y(e) {
+                let t = He(e);
+                if (t) return t;
+                try {
+                    let r = localStorage.getItem(f(e.storagePrefix).themeOverride);
+                    return r === "system" || r === "light" || r === "dark" ? r : "auto"
+                } catch {
+                    return "auto"
+                }
+            }
+ 
+            function He(e) {
+                if (typeof window > "u") return null;
+                let t = f(e.storagePrefix).embedderTheme,
+                    r = new URLSearchParams(window.location.search).get(Ae);
+                try {
+                    if (_(r)) return sessionStorage.getItem(t) !== r && sessionStorage.setItem(t, r), r;
+                    let n = sessionStorage.getItem(t);
+                    return _(n) ? n : null
+                } catch {
+                    return _(r) ? r : null
+                }
+            }
+ 
+            function _(e) {
+                return e === "light" || e === "dark"
+            }
+            var G = "sky-place",
+                C = "hark-wallpaper-v1";
+            var z = .25;
+ 
+            function E() {
+                if (typeof document > "u") return null;
+                let e = q(document.getElementById(G)?.textContent);
+                return xe(e) ? e : null
+            }
+ 
+            function U() {
+                let e = E();
+                if (e) try {
+                    let t = q(localStorage.getItem(C));
+                    if ($(t) && Te(t, e)) return;
+                    let {
+                        city: r,
+                        lat: n,
+                        lon: a,
+                        tz: i
+                    } = e;
+                    localStorage.setItem(C, JSON.stringify({
+                        place: r,
+                        lat: n,
+                        lon: a,
+                        tz: i
+                    }))
+                } catch (t) {
+                    if (!(t instanceof DOMException)) throw t
+                }
+            }
+ 
+            function Te(e, t) {
+                return Math.abs(e.lat - t.lat) < z && Math.abs(e.lon - t.lon) < z
+            }
+ 
+            function q(e) {
+                if (!e) return null;
+                try {
+                    return JSON.parse(e)
+                } catch {
+                    return null
+                }
+            }
+ 
+            function $(e) {
+                return typeof e != "object" || e === null ? !1 : "lat" in e && "lon" in e && Number.isFinite(e.lat) && Number.isFinite(e.lon)
+            }
+ 
+            function xe(e) {
+                return !$(e) || !("day" in e && "city" in e && "tz" in e) ? !1 : typeof e.day == "boolean" && Y(e.city) && Y(e.tz)
+            }
+ 
+            function Y(e) {
+                return e === null || typeof e == "string"
+            }
+            var Le = "(prefers-color-scheme: dark)";
+ 
+            function k(e) {
+                return e ? "light" : "dark"
+            }
+ 
+            function A() {
+                return typeof window > "u" || !window.matchMedia || window.matchMedia(Le).matches ? "dark" : "light"
+            }
+ 
+            function H(e, t) {
+                return e === "auto" ? null : e === "system" ? t : e
+            }
+ 
+            function Re(e, t) {
+                return H(e, A()) ?? t
+            }
+ 
+            function j(e) {
+                return Re(y(e), Me(e))
+            }
+ 
+            function Me(e) {
+                let t = E();
+                return t ? k(t.day) : Pe(e)
+            }
+ 
+            function Pe(e) {
+                try {
+                    return localStorage.getItem(f(e.storagePrefix).skyAppearance) === "light" ? "light" : "dark"
+                } catch {
+                    return "dark"
+                }
+            }
+ 
+            function J(e, t) {
+                if (typeof t.day != "boolean") return;
+                let r = k(t.day);
+                t.live === !0 && t.simActive === !1 && Ie(e, r), y(e) === "auto" && T(e, r)
+            }
+ 
+            function Ie(e, t) {
+                let r = f(e.storagePrefix).skyAppearance;
+                try {
+                    localStorage.getItem(r) !== t && localStorage.setItem(r, t)
+                } catch (n) {
+                    if (!(n instanceof DOMException)) throw n
+                }
+            }
+ 
+            function T(e, t) {
+                let r = e.appearanceAttribute;
+                !r || typeof document > "u" || document.documentElement.setAttribute(r, t)
+            }
+            var h = {
+                root: "sky-root",
+                canvas: "gl",
+                freeze: "skyfreeze",
+                placeholder: "skyph",
+                failure: "glfail"
+            };
+            var De = /^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/,
+                Oe = 65536;
+ 
+            function V(e) {
+                try {
+                    let t = localStorage.getItem(f(e.storagePrefix).placeholder);
+                    if (!t) return null;
+                    let r = JSON.parse(t).live;
+                    return typeof r == "string" && r.length <= Oe && De.test(r) ? r : null
+                } catch {
+                    return null
+                }
+            }
+ 
+            function Ne(e) {
+                return e.apiBase ? e.apiBase : typeof window > "u" ? "/api" : `${window.location.protocol}//${window.location.host}/api`
+            }
+            var Fe = /^https:\/\/gibs\.earthdata\.nasa\.gov\/wmts\/epsg4326\/best\/VIIRS_Black_Marble\/default\/2016-01-01\/500m\/6\/(\d+)\/(\d+)\.png$/;
+ 
+            function Ke(e, t) {
+                let r = e.indexOf("?"),
+                    n = r === -1 ? e : e.slice(0, r),
+                    a = r === -1 ? "" : e.slice(r);
+                switch (n) {
+                    case "https://api.open-meteo.com/v1/forecast":
+                        return `${t}/sky/forecast${a}`;
+                    case "https://air-quality-api.open-meteo.com/v1/air-quality":
+                        return `${t}/sky/air-quality${a}`;
+                    case "https://geocoding-api.open-meteo.com/v1/search":
+                        return `${t}/sky/geocode${a}`;
+                    case "https://ipapi.co/json/":
+                        return `${t}/sky/iplocate`
+                }
+                let i = Fe.exec(n);
+                return i ? `${t}/sky/skyglow/${i[1]}/${i[2]}` : null
+            }
+ 
+            function X(e) {
+                let t = Ne(e);
+                return (r, n) => {
+                    let a = typeof r == "string" ? r : r instanceof URL ? r.href : r.url,
+                        i = Ke(a, t);
+                    return i !== null ? fetch(i, n) : (console.warn("[sky] unproxied wallpaper fetch (add it to the sky proxies):", a), fetch(r, n))
+                }
+            }
+            var Z = h.freeze,
+                m = 8,
+                Be = 2e3,
+                We = 100;
+ 
+            function ee(e) {
+                if (typeof document > "u") return;
+                let t = document.getElementById(Z),
+                    r = t?.getContext("2d");
+                if (!t || !r || t.dataset.armed) return;
+                let n = Ge();
+                n && (t.dataset.armed = "true", window.addEventListener("resize", new x(e, t, r, n).onResize))
+            }
+ 
+            function te() {
+                return typeof document > "u" ? !1 : document.getElementById(Z)?.dataset.held === "true"
+            }
+            var x = class {
+                constructor(t, r, n, a) {
+                    o(this, "gl");
+                    o(this, "freeze");
+                    o(this, "freezeCtx");
+                    o(this, "probeCtx");
+                    o(this, "raf", 0);
+                    o(this, "bufferW", 0);
+                    o(this, "bufferH", 0);
+                    o(this, "heldMs", 0);
+                    o(this, "tickedAt", 0);
+                    o(this, "heldSerial", null);
+                    o(this, "onResize", () => {
+                        if (this.freeze.dataset.held) {
+                            this.markResize();
+                            return
+                        }
+                        this.beginHold()
+                    });
+                    o(this, "watch", t => {
+                        this.raf = requestAnimationFrame(this.watch), this.heldMs += Math.min(t - this.tickedAt, We), this.tickedAt = t;
+                        let r = this.gl.width === this.bufferW && this.gl.height === this.bufferH;
+                        if (this.bufferW = this.gl.width, this.bufferH = this.gl.height, r && this.drewSinceHold()) {
+                            this.release();
+                            return
+                        }
+                        this.heldMs >= Be && this.release()
+                    });
+                    this.gl = t, this.freeze = r, this.freezeCtx = n, this.probeCtx = a
+                }
+                beginHold() {
+                    this.holdsFrame() && (this.freeze.width = this.gl.width, this.freeze.height = this.gl.height, this.freezeCtx.drawImage(this.gl, 0, 0), this.freeze.style.visibility = "visible"), this.freeze.dataset.held = "true", this.markResize(), this.raf || (this.raf = requestAnimationFrame(this.watch))
+                }
+                markResize() {
+                    this.bufferW = this.gl.width, this.bufferH = this.gl.height, this.heldSerial = p(this.gl), this.heldMs = 0, this.tickedAt = performance.now()
+                }
+                holdsFrame() {
+                    let t = p(this.gl);
+                    return t === null ? Q(this.probeCtx, this.gl) : t !== (this.heldSerial ?? 0)
+                }
+                drewSinceHold() {
+                    let t = p(this.gl);
+                    return t === null ? Q(this.probeCtx, this.gl) : t !== this.heldSerial
+                }
+                release() {
+                    delete this.freeze.dataset.held, this.freeze.style.visibility = "hidden", this.freeze.width = 0, this.freeze.height = 0, this.raf && (cancelAnimationFrame(this.raf), this.raf = 0)
+                }
+            };
+ 
+            function Q(e, t) {
+                if (t.width === 0 || t.height === 0) return !1;
+                e.drawImage(t, 0, 0, m, m);
+                let {
+                    data: r
+                } = e.getImageData(0, 0, m, m);
+                for (let n = 4; n < r.length; n += 4)
+                    if (r[n] !== r[0] || r[n + 1] !== r[1] || r[n + 2] !== r[2]) return !0;
+                return !1
+            }
+ 
+            function Ge() {
+                let e = document.createElement("canvas");
+                return e.width = m, e.height = m, e.getContext("2d", {
+                    willReadFrequently: !0
+                })
+            }
+            var ze = {
+                light: 13,
+                dark: 23
+            };
+ 
+            function Ye(e, t, r = !1) {
+                e.setLive(!1), e.setSim(null), e.setTimeFlow(0), e.setHour(t, r)
+            }
+ 
+            function re(e, t, r, n = !1) {
+                return k(r) === t ? !1 : (Ye(e, ze[t], n), !0)
+            }
+ 
+            function ne(e) {
+                let t = null,
+                    r = null,
+                    n, a = 0,
+                    i = 0,
+                    d = !1,
+                    c = l => {
+                        t = l, a = 0
+                    },
+                    u = l => {
+                        i = a < l / e * .5 ? i + 1 : 0, i >= 2 && (d = !0)
+                    };
+                return {
+                    get collapsed() {
+                        return d
+                    },
+                    restart() {
+                        t = null, r = null, i = 0
+                    },
+                    recordFrame(l) {
+                        if (d) return;
+                        n ?? (n = l);
+                        let S = r !== null && l - r > e * 4,
+                            me = l - n < 1e4;
+                        if (r = l, t === null || S || me) return c(l);
+                        a += 1;
+                        let P = l - t;
+                        P < 3e3 || (u(P), c(l))
+                    }
+                }
+            }
+            var g = class {
+                constructor(t) {
+                    o(this, "frames", 0);
+                    o(this, "theme", !1);
+                    o(this, "framesPerChange");
+                    this.framesPerChange = t
+                }
+                owe(t) {
+                    this.frames = this.framesPerChange, t && (this.theme = !0)
+                }
+                get owed() {
+                    return this.frames > 0
+                }
+                get forTheme() {
+                    return this.theme
+                }
+                pay(t) {
+                    this.frames = this.theme && t === 1 ? 0 : this.frames - 1, this.frames === 0 && (this.theme = !1)
+                }
+            };
+            var v = 64,
+                Ue = 16,
+                oe = 6e4,
+                ie = 2e3,
+                qe = 3e3,
+                ae = 8,
+                $e = 2e4,
+                je = 30,
+                Je = 2.5,
+                Ve = Math.ceil(Je * 1e3 / v) + 1,
+                Xe = ["pointerdown", "touchstart", "dragover"],
+                Qe = ["wheel", "touchmove"];
+ 
+            function Ze(e) {
+                let t = p(e);
+                return t !== null && t > 0
+            }
+            var L = class {
+                constructor(t) {
+                    o(this, "canvas");
+                    o(this, "reduced");
+                    o(this, "parked", []);
+                    o(this, "cadence", ne(v));
+                    o(this, "drewAt", Number.NEGATIVE_INFINITY);
+                    o(this, "lastInput", performance.now());
+                    o(this, "redrawBudget", 0);
+                    o(this, "clearedSerial", null);
+                    o(this, "debt", new g(Ve));
+                    o(this, "heldUntil", 0);
+                    o(this, "stills", 0);
+                    o(this, "scrollGestureAt", Number.NEGATIVE_INFINITY);
+                    o(this, "resumeTimer");
+                    o(this, "waiting", null);
+                    o(this, "frames", t => Ze(this.canvas) ? this.schedule(t) : requestAnimationFrame(t));
+                    o(this, "oweChange", (t = !1) => {
+                        this.debt.owe(t), t && (this.heldUntil = 0), this.cutWait(), this.replayParked()
+                    });
+                    o(this, "onScroll", () => {
+                        this.held() && this.coasting() ? this.hold() : this.held() || this.wake()
+                    });
+                    o(this, "onPointerMove", t => {
+                        t.buttons ? this.hold() : this.held() || this.wake()
+                    });
+                    o(this, "holdForScrollGesture", () => {
+                        this.scrollGestureAt = performance.now(), this.hold()
+                    });
+                    o(this, "hold", () => {
+                        this.heldUntil = performance.now() + ie, clearTimeout(this.resumeTimer), this.resumeTimer = setTimeout(this.resumeAfterHold, ie)
+                    });
+                    o(this, "holdStill", () => {
+                        this.stills += 1;
+                        let t = !1;
+                        return () => {
+                            t || (t = !0, this.stills -= 1, this.hold())
+                        }
+                    });
+                    o(this, "resumeAfterHold", () => {
+                        this.heldUntil = 0, this.wake()
+                    });
+                    o(this, "wake", () => {
+                        this.lastInput = performance.now(), this.replayParked()
+                    });
+                    o(this, "restartPace", () => {
+                        this.cadence.restart(), this.cutWait(), this.wake()
+                    });
+                    o(this, "redrawNow", () => {
+                        this.clearedSerial = p(this.canvas), this.redrawBudget = je, this.drewAt = Number.NEGATIVE_INFINITY, this.cutWait(), this.wake()
+                    });
+                    this.canvas = t, this.reduced = window.matchMedia("(prefers-reduced-motion: reduce)"), this.listen()
+                }
+                paceMs() {
+                    return B(this.canvas) ? oe : this.debt.forTheme ? Ue : this.debt.owed ? v : this.reduced.matches || this.cadence.collapsed ? oe : v
+                }
+                watched() {
+                    return document.hasFocus() && performance.now() - this.lastInput < $e
+                }
+                mayPark() {
+                    return this.redrawBudget > 0 || te() || this.debt.forTheme ? !1 : this.held() ? !0 : !this.debt.owed && !this.watched()
+                }
+                held() {
+                    return this.stills > 0 || performance.now() < this.heldUntil
+                }
+                drewSinceResize() {
+                    return p(this.canvas) !== this.clearedSerial
+                }
+                schedule(t) {
+                    return requestAnimationFrame(r => {
+                        if (this.redrawBudget > 0 && (this.redrawBudget = this.drewSinceResize() ? 0 : this.redrawBudget - 1), this.mayPark()) {
+                            this.cadence.restart(), this.parked.push(t);
+                            return
+                        }
+                        let n = this.drewAt + this.paceMs() - r;
+                        if (n > 0) {
+                            this.scheduleAfter(t, n);
+                            return
+                        }
+                        this.drewAt = r, this.cadence.recordFrame(r), this.runFrame(t, r)
+                    })
+                }
+                runFrame(t, r) {
+                    let n = p(this.canvas) ?? 0;
+                    t(r), this.debt.owed && this.debt.pay((p(this.canvas) ?? 0) - n)
+                }
+                scheduleAfter(t, r) {
+                    if (r <= ae) {
+                        this.schedule(t);
+                        return
+                    }
+                    let n = setTimeout(() => {
+                        this.waiting = null, this.schedule(t)
+                    }, r - ae);
+                    this.waiting = {
+                        timer: n,
+                        callback: t
+                    }
+                }
+                cutWait() {
+                    if (!this.waiting) return;
+                    clearTimeout(this.waiting.timer);
+                    let {
+                        callback: t
+                    } = this.waiting;
+                    this.waiting = null, this.schedule(t)
+                }
+                coasting() {
+                    return performance.now() - this.scrollGestureAt < qe
+                }
+                replayParked() {
+                    if (this.parked.length === 0) return;
+                    let t = this.parked;
+                    this.parked = [];
+                    for (let r of t) this.schedule(r)
+                }
+                listen() {
+                    window.addEventListener("focus", this.wake), document.addEventListener("visibilitychange", this.restartPace), this.reduced.addEventListener("change", this.restartPace), window.addEventListener("keydown", this.hold, {
+                        passive: !0,
+                        capture: !0
+                    });
+                    for (let t of Xe) window.addEventListener(t, this.hold, {
+                        passive: !0,
+                        capture: !0
+                    });
+                    window.addEventListener("pointermove", this.onPointerMove, {
+                        passive: !0,
+                        capture: !0
+                    });
+                    for (let t of Qe) window.addEventListener(t, this.holdForScrollGesture, {
+                        passive: !0,
+                        capture: !0
+                    });
+                    window.addEventListener("scroll", this.onScroll, {
+                        passive: !0,
+                        capture: !0
+                    }), window.addEventListener("resize", this.redrawNow)
+                }
+            };
+ 
+            function se(e) {
+                return de(e).frames
+            }
+ 
+            function le(e, t) {
+                let r = de(t);
+                return new Proxy(e, {
+                    get(n, a, i) {
+                        let d = Reflect.get(n, a, i);
+                        return typeof d != "function" ? d : (...c) => {
+                            let u = Reflect.apply(d, n, c);
+                            return r.oweChange(a === "markAppearanceChange"), u
+                        }
+                    }
+                })
+            }
+ 
+            function de(e) {
+                let t = e;
+                return t.__harkSkyGate ?? (t.__harkSkyGate = new L(e)), t.__harkSkyGate
+            }
+ 
+            function ue(e, t, r) {
+                new Function("fetch", "requestAnimationFrame", e)(t, se(r));
+                let n = window.hark;
+                if (!n?.applyScene) throw new Error("wallpaper script did not publish window.hark");
+                return le(n, r)
+            }
+            var R = "nativeSky";
+            var tt = "plugin:hark|sky_attach",
+                rt = 2e3,
+                w = {
+                    drawn: !1,
+                    status: null
+                };
+ 
+            function pe() {
+                return nt(R)
+            }
+ 
+            function nt(e) {
+                return typeof document > "u" ? !1 : document.documentElement.dataset[e] === "1"
+            }
+ 
+            function M() {
+                delete document.documentElement.dataset[R]
+            }
+            async function fe() {
+                let e = window.__TAURI_INTERNALS__,
+                    t = e ? await ot(e.invoke(tt)) : w;
+                return t.drawn || M(), t
+            }
+ 
+            function ot(e) {
+                let t, r = new Promise(a => {
+                        t = setTimeout(() => a(w), rt)
+                    }),
+                    n = e.then(it, () => w);
+                return Promise.race([n, r]).finally(() => clearTimeout(t))
+            }
+ 
+            function it(e) {
+                return !ce(e) || e.drawn !== !0 ? w : {
+                    drawn: !0,
+                    status: ce(e.status) ? e.status : null
+                }
+            }
+ 
+            function ce(e) {
+                return typeof e == "object" && e !== null
+            }
+            var at = 1e4;
+ 
+            function st() {
+                let e = () => {
+                        let r = document.getElementById(h.canvas);
+                        return r && document.getElementById(h.failure) ? r : null
+                    },
+                    t = e();
+                return t ? Promise.resolve(t) : new Promise(r => {
+                    let n = new MutationObserver(() => {
+                        let a = e();
+                        a && (n.disconnect(), r(a))
+                    });
+                    n.observe(document, {
+                        childList: !0,
+                        subtree: !0
+                    })
+                })
+            }
+ 
+            function lt(e) {
+                let t = V(e);
+                t && document.documentElement.style.setProperty("--sky-placeholder", `url("${t}") center / cover no-repeat`)
+            }
+ 
+            function dt(e, t) {
+                let r = null;
+                return () => {
+                    let n = e.lastStatus?.day;
+                    !e.api || e.api === r || typeof n != "boolean" || (r = e.api, re(e.api, t, n))
+                }
+            }
+ 
+            function ut(e, t) {
+                T(t, j(t));
+                let r = H(y(t), A()),
+                    n = r ? dt(e, r) : () => {},
+                    a = i => {
+                        i.type === "status" ? (e.lastStatus = i, J(t, i), n()) : i.type === "config" && (e.lastConfig = i), !e.onMessage && i.type === "jserror" && console.warn("[wallpaper js]", i.msg), e.onMessage?.(i)
+                    };
+                return N(a), {
+                    receive: a,
+                    settle: n
+                }
+            }
+ 
+            function ct(e, t, r) {
+                return {
+                    status: n => t.receive({
+                        ...n,
+                        type: "status"
+                    }),
+                    connect: n => {
+                        e.api = n, e.onApi?.(n), t.settle(), e.painted = !0, e.onPainted?.()
+                    },
+                    lost: () => {
+                        M(), r()
+                    }
+                }
+            }
+ 
+            function pt(e, t) {
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    e.painted = !0, t.style.visibility = "visible", document.getElementById(h.placeholder)?.style.setProperty("opacity", "0"), e.onPainted?.()
+                }))
+            }
+ 
+            function ft(e, t, r, n, a) {
+                let i = F(n);
+                if (!i) throw new Error(`${t.wallpaperUrl}: no script block found`);
+                K(r), ee(r);
+                let d = ue(i, X(t), r);
+                e.api = d, e.onApi?.(d), a(), pt(e, r)
+            }
+ 
+            function he(e) {
+                if (typeof document > "u") return;
+                let t = window;
+                if (t[b]) return;
+                let r = W(e),
+                    n = {
+                        lastStatus: null,
+                        lastConfig: null,
+                        api: null,
+                        painted: !1,
+                        host: r,
+                        onMessage: null,
+                        onApi: null,
+                        onPainted: null,
+                        hostSky: null
+                    };
+                t[b] = n, lt(r), U();
+                let a = ut(n, r),
+                    {
+                        settle: i
+                    } = a,
+                    d = () => {
+                        Promise.all([fetch(r.wallpaperUrl).then(u => u.text()), st()]).then(([u, l]) => ft(n, r, l, u, i)).catch(u => {
+                            console.error("wallpaper boot failed:", u), setTimeout(d, at)
+                        })
+                    };
+                if (!pe()) {
+                    d();
+                    return
+                }
+                let c = ct(n, a, d);
+                n.hostSky = c, fe().then(({
+                    drawn: u,
+                    status: l
+                }) => {
+                    u ? l && c.status(l) : d()
+                })
+            }
+            he(typeof s > "u" ? void 0 : s);
+        })();
+    </script>
+    <div id="sky-root">
+        <canvas id="gl" aria-hidden="true"></canvas>
+        <canvas id="skyfreeze" aria-hidden="true"></canvas>
+        <div id="skyph" aria-hidden="true"></div>
+        <div id="glfail">This wallpaper needs WebGL, which isn’t available in your browser.</div>
+    </div>
+ 
+    <div id="root" data-sha="a80ebe7">
+        <div id="theme-root" class="mr6c8q0"></div>
+    </div>
+</html>
+</body>
