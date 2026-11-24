@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hogwarts Express: Sveta's 10th Birthday Journey</title>
+<style>
+  :root {
+    --parch: #f4e6c3;
+    --parch-dark: #e6d2a0;
+    --burgundy: #740001;
+    --burgundy-dark: #4a0002;
+    --gold: #d3a625;
+    --gold-light: #f5d76e;
+    --ink: #2b1d0e;
+    --steam: rgba(255,255,255,0.85);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    background: radial-gradient(ellipse at top, #fbf1d6 0%, var(--parch) 55%, var(--parch-dark) 100%);
+    overflow-x: hidden;
+    touch-action: manipulation;
+    user-select: none;
+  }
+  header {
+    text-align: center;
+    padding: 14px 10px 4px;
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(1.4rem, 4vw, 2.4rem);
+    color: var(--burgundy);
+    text-shadow: 1px 1px 0 var(--gold-light);
+    letter-spacing: 1px;
+  }
+  .sub { font-style: italic; margin: 4px 0 0; font-size: clamp(0.95rem, 2.5vw, 1.15rem); }
+  .banner {
+    position: relative;
+    margin: 10px auto;
+    max-width: 960px;
+    height: 70px;
+    background: linear-gradient(var(--burgundy), var(--burgundy-dark));
+    border: 3px solid var(--gold);
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3), inset 0 0 0 2px rgba(211,166,37,0.4);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold-light);
+    font-weight: bold;
+    font-size: clamp(0.95rem, 2.6vw, 1.3rem);
+    overflow: hidden;
+  }
+  .banner .plat { position: absolute; left: 12px; top: 10px; font-size: 0.8rem; color: var(--parch); }
+  .banner .dest { position: absolute; right: 12px; top: 10px; font-size: 0.8rem; color: var(--parch); }
+
+  /* Board */
+  .board-wrap {
+    position: relative;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 10px;
+  }
+  .track-area {
+    position: relative;
+    width: 100%;
+    height: clamp(440px, 62vw, 560px);
+  }
+  svg.rails { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .station {
+    position: absolute;
+    width: clamp(54px, 9vw, 74px);
+    height: clamp(54px, 9vw, 74px);
+    margin-left: calc(clamp(54px, 9vw, 74px) / -2);
+    margin-top: calc(clamp(54px, 9vw, 74px) / -2);
+    border-radius: 50%;
+    background: var(--parch);
+    border: 3px solid var(--gold);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 0.7rem;
+    text-align: center;
+    line-height: 1.05;
+    z-index: 2;
+  }
+  .station .num { font-weight: bold; font-size: 0.85rem; color: var(--burgundy); }
+  .station.q { background: linear-gradient(#fff6d6, #f1d78a); }
+  .station.q::after { content: "?"; position: absolute; top: -8px; right: -6px; background: var(--burgundy); color: var(--gold-light); border-radius: 50%; width: 20px; height: 20px; line-height: 20px; text-align: center; font-weight: bold; font-size: 0.9rem; }
+  .station.trolley { background: #ffd9d0; border-color: #a33; }
+  .station.frog { background: #d8f5d0; border-color: #3a7d2c; }
+  .station.done { background: var(--gold-light); }
+  .station.start { background: var(--burgundy); color: var(--gold-light); }
+  .station.start .num { color: var(--gold-light); }
+  .station.finish { background: var(--gold); border-color: var(--burgundy); }
+  .station.visited::before { content: "✓"; position: absolute; bottom: -6px; left: -6px; background: #3a7d2c; color: #fff; border-radius: 50%; width: 18px; height: 18px; line-height: 18px; font-size: 0.7rem; }
+
+  .train {
+    position: absolute;
+    width: clamp(64px, 10vw, 84px);
+    height: clamp(48px, 7vw, 60px);
+    margin-left: calc(clamp(64px, 10vw, 84px) / -2);
+    margin-top: calc(clamp(48px, 7vw, 60px) / -2 - 8px);
+    transition: left 0.45s cubic-bezier(.45,.05,.55,.95), top 0.45s cubic-bezier(.45,.05,.55,.95);
+    z-index: 5;
+    pointer-events: none;
+  }
+  .train.bump { animation: bump 0.4s ease; }
+  @keyframes bump { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  .train svg { width: 100%; height: 100%; overflow: visible; }
+  .steam { position: absolute; border-radius: 50%; background: var(--steam); pointer-events: none; z-index: 4; animation: puff 1.6s ease-out forwards; }
+  @keyframes puff {
+    0% { opacity: 0.9; transform: translate(0,0) scale(0.4); }
+    100% { opacity: 0; transform: translate(-30px,-60px) scale(2.2); }
+  }
+
+  /* Controls */
+  .controls {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    margin: 12px auto 6px; max-width: 960px; padding: 0 10px;
+  }
+  .ticket {
+    background: linear-gradient(#fffaf0, var(--parch));
+    border: 2px dashed var(--burgundy);
+    border-radius: 10px;
+    padding: 10px 16px;
+    width: 100%;
+    max-width: 520px;
+    text-align: center;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  }
+  .ticket .dice-face {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 64px; height: 64px; margin: 4px;
+    background: #fff; border: 3px solid var(--burgundy); border-radius: 12px;
+    font-size: 2rem; font-weight: bold; color: var(--burgundy);
+    box-shadow: 0 3px 0 var(--burgundy-dark);
+  }
+  .ticket .dice-face.rolling { animation: shake 0.12s linear infinite; }
+  @keyframes shake { 0% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } 100% { transform: rotate(-12deg); } }
+  .status { min-height: 3em; font-size: clamp(0.95rem, 2.5vw, 1.1rem); margin: 6px 0 0; }
+  button.big {
+    font-family: inherit;
+    font-size: clamp(1.1rem, 3vw, 1.4rem);
+    font-weight: bold;
+    color: var(--gold-light);
+    background: linear-gradient(var(--burgundy), var(--burgundy-dark));
+    border: 3px solid var(--gold);
+    border-radius: 14px;
+    padding: 14px 32px;
+    min-width: 220px;
+    min-height: 56px;
+    cursor: pointer;
+    box-shadow: 0 5px 0 var(--burgundy-dark), 0 8px 14px rgba(0,0,0,0.3);
+    transition: transform 0.08s;
+  }
+  button.big:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--burgundy-dark); }
+  button.big:disabled { opacity: 0.5; cursor: not-allowed; }
+  .progress { font-size: 0.95rem; font-style: italic; }
+
+  /* Modal */
+  .modal {
+    position: fixed; inset: 0; background: rgba(43,29,14,0.65);
+    display: none; align-items: center; justify-content: center; z-index: 50; padding: 12px;
+  }
+  .modal.show { display: flex; animation: fade 0.3s ease; }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  .card {
+    background: var(--parch);
+    border: 4px double var(--gold);
+    outline: 3px solid var(--burgundy);
+    outline-offset: -12px;
+    border-radius: 14px;
+    max-width: 560px; width: 100%;
+    padding: 22px 20px 18px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+    text-align: center;
+    max-height: 92vh; overflow-y: auto;
+    animation: pop 0.35s cubic-bezier(.2,1.4,.4,1);
+  }
+  @keyframes pop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .card h2 { color: var(--burgundy); margin: 0 0 6px; font-size: clamp(1.2rem, 3.4vw, 1.6rem); }
+  .bubble {
+    position: relative;
+    background: #fffdf5;
+    border: 2px solid var(--burgundy);
+    border-radius: 16px;
+    padding: 12px 14px;
+    margin: 12px 0;
+    font-size: clamp(1.05rem, 3vw, 1.3rem);
+    font-weight: bold;
+    color: var(--burgundy-dark);
+  }
+  .bubble::after {
+    content: ""; position: absolute; bottom: -14px; left: 40px;
+    border: 8px solid transparent; border-top-color: var(--burgundy);
+  }
+  .hint { font-size: 0.95rem; font-style: italic; margin: 6px 0 10px; }
+  .choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 8px; }
+  .choice {
+    font-family: inherit; font-size: clamp(0.95rem, 2.6vw, 1.1rem);
+    background: #fff; color: var(--ink);
+    border: 2px solid var(--burgundy); border-radius: 12px;
+    padding: 12px 8px; min-height: 60px; cursor: pointer;
+    box-shadow: 0 3px 0 var(--parch-dark);
+  }
+  .choice:active { transform: translateY(2px); }
+  .choice.right { background: #c9efb8; border-color: #3a7d2c; }
+  .choice.wrong { background: #f8c9c4; border-color: #a33; }
+  .choice .swatch { display: inline-block; width: 18px; height: 18px; border-radius: 50%; vertical-align: middle; margin-right: 6px; border: 1px solid #333; }
+  input.typing {
+    font-family: inherit; font-size: clamp(1.1rem, 3vw, 1.4rem);
+    width: 100%; max-width: 420px; padding: 12px;
+    border: 2px solid var(--burgundy); border-radius: 10px;
+    background: #fff; color: var(--ink); margin-top: 8px;
+    user-select: text;
+  }
+  .feedback { min-height: 2.4em; margin: 10px 0; font-weight: bold; font-size: clamp(1rem, 2.8vw, 1.2rem); }
+  .feedback.good { color: #2f6b22; }
+  .feedback.bad { color: var(--burgundy); }
+  .card .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+  .event-box { font-size: clamp(1.05rem, 3vw, 1.25rem); margin: 10px 0; padding: 14px; border-radius: 12px; }
+  .event-box.trolley { background: #ffd9d0; border: 2px solid #a33; color: #6b1010; }
+  .event-box.frog { background: #d8f5d0; border: 2px solid #3a7d2c; color: #1f4d15; }
+
+  /* Finale */
+  #finale {
+    position: fixed; inset: 0; z-index: 60; display: none;
+    background: radial-gradient(ellipse at center, #5a0a0c 0%, #2a0304 80%);
+    color: var(--gold-light); overflow-y: auto; text-align: center;
+  }
+  #finale.show { display: block; animation: fade 0.8s ease; }
+  .hall { position: relative; max-width: 760px; margin: 0 auto; padding: 24px 16px 40px; }
+  .hall h1 { color: var(--gold-light); text-shadow: 0 0 12px var(--gold); font-size: clamp(1.8rem, 6vw, 3.2rem); margin: 10px 0; }
+  .hall p { font-size: clamp(1.05rem, 3vw, 1.3rem); line-height: 1.5; }
+  .candles { display: flex; justify-content: space-around; margin: 10px 0 20px; }
+  .candle { width: 26px; }
+  .flame { width: 16px; height: 26px; margin: 0 auto; background: radial-gradient(#fff7b0, #ffb300 60%, rgba(255,80,0,0) 70%); border-radius: 50% 50% 40% 40%; animation: flicker 0.6s infinite alternate; }
+  @keyframes flicker { from { transform: scale(1) translateY(0); } to { transform: scale(0.85) translateY(2px); } }
+  .stick { width: 8px; height: 40px; margin: 0 auto; background: #f5ecd0; border-radius: 3px; }
+  .confetti { position: fixed; top: -20px; width: 10px; height: 16px; z-index: 70; pointer-events: none; animation: fall linear forwards; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+  .cake-msg { margin-top: 18px; font-size: clamp(1.4rem, 5vw, 2.2rem); color: var(--gold-light); font-weight: bold; }
+  .sparkle { color: var(--gold); }
+  .restart { margin-top: 24px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>The Hogwarts Express</h1>
+  <p class="sub">A birthday journey for Sveta, Platform 9 ¾ to Hogwarts Castle</p>
+</header>
+
+<div class="banner">
+  <span class="plat">Platform 9 ¾</span>
+  <span id="bannerText">All aboard! Next stop: adventure</span>
+  <span class="dest">Hogwarts ⚡</span>
+</div>
+
+<div class="board-wrap">
+  <div class="track-area" id="track">
+    <svg class="rails" id="rails" viewBox="0 0 1000 560" preserveAspectRatio="none"></svg>
+    <div id="stations"></div>
+    <div class="train" id="train">
+      <svg viewBox="0 0 90 64" aria-hidden="true">
+        <!-- tender -->
+        <rect x="2" y="30" width="22" height="24" rx="3" fill="#2b1d0e"/>
+        <rect x="2" y="26" width="22" height="6" fill="#d3a625"/>
+        <!-- boiler body -->
+        <rect x="22" y="26" width="46" height="28" rx="5" fill="#740001"/>
+        <rect x="22" y="36" width="46" height="4" fill="#d3a625"/>
+        <!-- cab -->
+        <rect x="58" y="18" width="26" height="36" rx="3" fill="#740001"/>
+        <rect x="62" y="24" width="8" height="8" fill="#fdf0b8"/>
+        <rect x="72" y="24" width="8" height="8" fill="#fdf0b8"/>
+        <!-- chimney -->
+        <rect x="30" y="12" width="8" height="16" fill="#2b1d0e"/>
+        <ellipse cx="34" cy="12" rx="7" ry="3" fill="#2b1d0e"/>
+        <!-- dome -->
+        <circle cx="48" cy="26" r="5" fill="#d3a625"/>
+        <!-- wheels -->
+        <circle cx="16" cy="56" r="7" fill="#2b1d0e" stroke="#d3a625" stroke-width="2"/>
+        <circle cx="40" cy="56" r="7" fill="#2b1d0e" stroke="#d3a625" stroke-width="2"/>
+        <circle cx="70" cy="56" r="7" fill="#2b1d0e" stroke="#d3a625" stroke-width="2"/>
+        <!-- face-ish lamp -->
+        <circle cx="84" cy="38" r="3" fill="#fff7b0"/>
+        <text x="30" y="46" font-size="8" fill="#f5d76e" font-family="Georgia">HE</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="ticket">
+    <div>Your ticket punch</div>
+    <div id="dice" class="dice-face">?</div>
+    <div class="status" id="status">Press the button to punch your ticket and roll the dice!</div>
+  </div>
+  <button class="big" id="rollBtn">Punch Ticket!</button>
+  <div class="progress" id="progress">Station 0 of 25</div>
+</div>
+
+<!-- Question / event modal -->
+<div class="modal" id="modal">
+  <div class="card" id="card"></div>
+</div>
+
+<!-- Finale -->
+<div id="finale">
+  <div class="hall">
+    <div class="candles" id="candles"></div>
+    <h1>Welcome to Hogwarts!</h1>
+    <p>The Great Hall glows with golden light and floating candles.</p>
+    <p>Sveta, the Sorting Hat has seen all your English words and it says:</p>
+    <p class="sparkle">Happy 10th Birthday, Sveta!</p>
+    <div class="cake-msg">Happy Birthday, Sveta! You are 10 years old today!</div>
+    <div class="restart"><button class="big" id="restartBtn">Ride Again!</button></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  // ---------- Config ----------
+  const FINISH = 25;
+
+  // Snake-shaped track positions as percentages of the track area
+  const pts = [];
+  // Build a winding path: rows of 6 stations, alternating direction
+  const cols = 6, rows = 5;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const idx = r * cols + c;
+      if (idx > FINISH) break;
+      const col = (r % 2 === 0) ? c : (cols - 1 - c);
+      pts.push({
+        x: 8 + col * (84 / (cols - 1)),
+        y: 9 + r * (82 / (rows - 1))
+      });
+    }
+  }
+  // station 0 is platform, station FINISH is Hogwarts (last point)
+  // Pad: ensure we have FINISH+1 points
+  while (pts.length < FINISH + 1) pts.push(pts[pts.length - 1]);
+
+  // Special tiles
+  const questions = {
+    3:  { type: 'name' },
+    7:  { type: 'age' },
+    11: { type: 'colour' },
+    15: { type: 'book' },
+    19: { type: 'character' },
+    23: { type: 'name' }
+  };
+  const specials = {
+    5:  { kind: 'trolley', move: -1, text: 'Oh no, the Trolley Witch blocked the corridor! Step back 1 step.' },
+    9:  { kind: 'frog', move: 2, text: 'A Chocolate Frog hopped ahead! Move forward 2 steps!' },
+    13: { kind: 'trolley', move: -2, text: 'The Trolley Witch is pushing her cart in your way! Step back 2 steps.' },
+    17: { kind: 'frog', move: 2, text: 'A Chocolate Frog hopped ahead! Move forward 2 steps!' },
+    21: { kind: 'trolley', move: -1, text: 'The Trolley Witch is back! Step back 1 step.' }
+  };
+
+  const QUESTIONS = {
+    age: {
+      title: 'How old are you?',
+      prompt: '"I am 10 years old!"',
+      hint: 'Tap the sentence that is true for you.',
+      choices: [
+        { t: 'I am 10 years old!', ok: true },
+        { t: 'I am 9 years old.', ok: false },
+        { t: 'I am 11 years old.', ok: false }
+      ]
+    },
+    colour: {
+      title: 'What is your favourite colour?',
+      prompt: '"My favourite colour is Gryffindor Gold!"',
+      hint: 'Pick the colour you love most.',
+      choices: [
+        { t: 'Gryffindor Gold', ok: true, sw: '#d3a625' },
+        { t: 'Burgundy', ok: true, sw: '#740001' },
+        { t: 'Emerald', ok: true, sw: '#1f7a4d' },
+        { t: 'Sapphire', ok: true, sw: '#1d4f9c' }
+      ],
+      anyOk: true,
+      reply: 'My favourite colour is ...'
+    },
+    book: {
+      title: 'What is your favourite book?',
+      prompt: '"My favourite book is Harry Potter and the Philosopher\'s Stone."',
+      hint: 'Choose a book, then say: My favourite book is ...',
+      choices: [
+        { t: "Harry Potter and the Philosopher's Stone", ok: true },
+        { t: 'Charlie and the Chocolate Factory', ok: true },
+        { t: 'Matilda', ok: true },
+        { t: 'The Hobbit', ok: true }
+      ],
+      anyOk: true
+    },
+    character: {
+      title: 'Who is your favourite character?',
+      prompt: '"My favourite character is Hermione."',
+      hint: 'Choose a character from the wizarding world.',
+      choices: [
+        { t: 'Hermione', ok: true },
+        { t: 'Harry', ok: true },
+        { t: 'Ron', ok: true },
+        { t: 'Snape', ok: true }
+      ],
+      anyOk: true
+    },
+    name: {
+      title: 'What is your name?',
+      prompt: 'Type the sentence below.',
+      hint: 'Finish the sentence with your name. Example: My name is Sveta.',
+      typing: true
+    }
+  };
+
+  // ---------- State ----------
+  let pos = 0;           // current station index
+  let busy = false;      // animation/modal lock
+  let visited = new Set();
+  let answeredOnce = new Set(); // question tiles completed
+  let started = false;
+
+  // ---------- Audio (Web Audio API) ----------
+  let ac = null;
+  function ctx() {
+    if (!ac) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) ac = new AC();
+    }
+    if (ac && ac.state === 'suspended') ac.resume();
+    return ac;
+  }
+  function tone(freq, start, dur, type = 'sine', vol = 0.18) {
+    const a = ctx(); if (!a) return;
+    const o = a.createOscillator();
+    const g = a.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, a.currentTime + start);
+    g.gain.setValueAtTime(0.0001, a.currentTime + start);
+    g.gain.exponentialRampToValueAtTime(vol, a.currentTime + start + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + start + dur);
+    o.connect(g); g.connect(a.destination);
+    o.start(a.currentTime + start);
+    o.stop(a.currentTime + start + dur + 0.05);
+  }
+  function chime(good) {
+    if (good) { [523, 659, 784, 1046].forEach((f, i) => tone(f, i * 0.12, 0.45, 'triangle', 0.2)); }
+    else { tone(330, 0, 0.25, 'sawtooth', 0.08); tone(220, 0.2, 0.35, 'sawtooth', 0.08); }
+  }
+  function whistle() {
+    const a = ctx(); if (!a) return;
+    const o = a.createOscillator(); const g = a.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(600, a.currentTime);
+    o.frequency.linearRampToValueAtTime(980, a.currentTime + 0.5);
+    o.frequency.linearRampToValueAtTime(900, a.currentTime + 1.1);
+    g.gain.setValueAtTime(0.0001, a.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.12, a.currentTime + 0.1);
+    g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + 1.2);
+    o.connect(g); g.connect(a.destination);
+    o.start(); o.stop(a.currentTime + 1.3);
+  }
+  function chug() {
+    const a = ctx(); if (!a) return;
+    for (let i = 0; i < 4; i++) tone(90 + Math.random() * 20, i * 0.18, 0.12, 'square', 0.06);
+  }
+  function fanfare() {
+    const notes = [392, 523, 659, 784, 659, 784, 1046];
+    notes.forEach((f, i) => tone(f, i * 0.18, 0.5, 'triangle', 0.2));
+    setTimeout(() => {
+      [523, 659, 784].forEach((f) => tone(f, 1.6, 1.2, 'sine', 0.14));
+    }, 0);
+    tone(1046, 1.9, 1.4, 'triangle', 0.18);
+  }
+
+  // ---------- Board drawing ----------
+  const trackEl = document.getElementById('track');
+  const stationsEl = document.getElementById('stations');
+  const railsEl = document.getElementById('rails');
+  const trainEl = document.getElementById('train');
+
+  function xy(i) {
+    const p = pts[i];
+    return { x: p.x, y: p.y };
+  }
+  function drawRails() {
+    let d = '';
+    for (let i = 0; i < pts.length - 1; i++) {
+      const a = pts[i], b = pts[i + 1];
+      const ax = a.x * 10, ay = a.y * 5.6, bx = b.x * 10, by = b.y * 5.6;
+      if (a.y === b.y) {
+        d += `M${ax},${ay} L${bx},${by} `;
+      } else {
+        // curve at row ends
+        const mx = (ax + bx) / 2;
+        const my = (ay + by) / 2;
+        d += `M${ax},${ay} Q${bx > ax ? 1000 : 0},${my} ${bx},${by} `;
+      }
+    }
+    railsEl.innerHTML = `
+      <path d="${d}" fill="none" stroke="#2b1d0e" stroke-width="10" stroke-linecap="round" opacity="0.5" transform="translate(0,4)"/>
+      <path d="${d}" fill="none" stroke="#7a5a2a" stroke-width="8" stroke-linecap="round"/>
+      <path d="${d}" fill="none" stroke="#d3a625" stroke-width="2" stroke-dasharray="6 8" stroke-linecap="round"/>`;
+  }
+
+  function buildStations() {
+    stationsEl.innerHTML = '';
+    for (let i = 0; i <= FINISH; i++) {
+      const { x, y } = xy(i);
+      const el = document.createElement('div');
+      el.className = 'station';
+      el.id = 'st' + i;
+      el.style.left = x + '%';
+      el.style.top = (y / 100 * 100) + '%';
+      el.style.top = (y) + '%';
+      let label = '';
+      if (i === 0) { el.classList.add('start'); label = '<span class="num">9¾</span>Platform'; }
+      else if (i === FINISH) { el.classList.add('finish'); label = '<span class="num">🏰</span>Hogwarts'; }
+      else if (questions[i]) { el.classList.add('q'); label = `<span class="num">${i}</span>Question`; }
+      else if (specials[i]) { el.classList.add(specials[i].kind); label = `<span class="num">${i}</span>${specials[i].kind === 'frog' ? 'Frog' : 'Trolley'}`; }
+      else { label = `<span class="num">${i}</span>Track`; }
+      el.innerHTML = label;
+      stationsEl.appendChild(el);
+    }
+    placeTrain(false);
+  }
+
+  function placeTrain(animate) {
+    const { x, y } = xy(pos);
+    if (!animate) trainEl.style.transition = 'none';
+    trainEl.style.left = x + '%';
+    trainEl.style.top = y + '%';
+    if (!animate) { trainEl.offsetHeight; trainEl.style.transition = ''; }
+  }
+
+  function updateHUD() {
+    document.getElementById('progress').textContent = `Station ${pos} of ${FINISH}`;
+    document.querySelectorAll('.station').forEach((el, i) => {
+      el.classList.toggle('visited', visited.has(i) && i !== pos);
+    });
+  }
+
+  function setBanner(t) { document.getElementById('bannerText').textContent = t; }
+  function setStatus(t) { document.getElementById('status').textContent = t; }
+
+  function steam() {
+    const { x, y } = xy(pos);
+    const tr = trainEl.getBoundingClientRect();
+    const tk = trackEl.getBoundingClientRect();
+    const px = tr.left - tk.left + tr.width * 0.4;
+    const py = tr.top - tk.top;
+    for (let i = 0; i < 4; i++) {
+      const s = document.createElement('div');
+      s.className = 'steam';
+      const size = 16 + Math.random() * 14;
+      s.style.width = size + 'px';
+      s.style.height = size + 'px';
+      s.style.left = (px + Math.random() * 10) + 'px';
+      s.style.top = (py + Math.random() * 6) + 'px';
+      s.style.animationDelay = (i * 0.1) + 's';
+      trackEl.appendChild(s);
+      setTimeout(() => s.remove(), 2000);
+    }
+  }
+
+  // ---------- Movement ----------
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  async function stepTo(target) {
+    const dir = target > pos ? 1 : -1;
+    while (pos !== target) {
+      pos += dir;
+      placeTrain(true);
+      chug();
+      if (pos >= 0 && pos <= FINISH) visited.add(pos);
+      updateHUD();
+      await wait(480);
+    }
+  }
+
+  // ---------- Dice ----------
+  function rollDice() {
+    return new Promise((resolve) => {
+      const dice = document.getElementById('dice');
+      dice.classList.add('rolling');
+      let n = 0;
+      const iv = setInterval(() => {
+        dice.textContent = 1 + Math.floor(Math.random() * 6);
+        n++;
+        if (n > 12) {
+          clearInterval(iv);
+          dice.classList.remove('rolling');
+          const v = 1 + Math.floor(Math.random() * 6);
+          dice.textContent = v;
+          resolve(v);
+        }
+      }, 70);
+    });
+  }
+
+  // ---------- Modal helpers ----------
+  const modal = document.getElementById('modal');
+  const card = document.getElementById('card');
+  function openCard(html) {
+    card.innerHTML = html;
+    modal.classList.add('show');
+  }
+  function closeCard() { modal.classList.remove('show'); }
+
+  function speak(text) {
+    try {
+      if ('speechSynthesis' in window) {
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = 0.9; u.lang = 'en-US';
+        speechSynthesis.cancel();
+        speechSynthesis.speak(u);
+      }
+    } catch (e) {}
+  }
+
+  function askQuestion(type) {
+    return new Promise((resolve) => {
+      const q = QUESTIONS[type];
+      if (q.typing) {
+        openCard(`
+          <h2>${q.title}</h2>
+          <div class="hint">${q.hint}</div>
+          <div class="bubble">Hello! Who are you?<br><span style="font-weight:normal">Say: "My name is ..."</span></div>
+          <input class="typing" id="ans" type="text" value="My name is " autocomplete="off" autocapitalize="words" />
+          <div class="feedback" id="fb"></div>
+          <div class="btn-row">
+            <button class="big" id="check" style="min-width:160px">Check</button>
+            <button class="big" id="speakBtn" style="min-width:160px">Listen</button>
+          </div>
+        `);
+        const input = document.getElementById('ans');
+        const fb = document.getElementById('fb');
+        let tries = 0;
+        document.getElementById('speakBtn').onclick = () => speak('My name is Sveta');
+        document.getElementById('check').onclick = () => {
+          const v = input.value.trim();
+          const m = v.toLowerCase().match(/^my name is\s+([a-z]+)/);
+          if (m && m[1].length >= 2) {
+            chime(true);
+            const nm = m[1].charAt(0).toUpperCase() + m[1].slice(1);
+            fb.className = 'feedback good';
+            fb.textContent = `Wonderful! Hello, ${nm}!`;
+            setTimeout(() => { closeCard(); resolve(); }, 1500);
+          } else {
+            tries++;
+            chime(false);
+            fb.className = 'feedback bad';
+            fb.textContent = tries >= 2 ? 'Try: My name is Sveta' : 'Almost! Start with "My name is" and add your name.';
+            if (tries >= 2) input.value = 'My name is Sveta';
+          }
+        };
+        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('check').click(); });
+        return;
+      }
+
+      // multiple choice
+      const choiceHtml = q.choices.map((c, i) =>
+        `<button class="choice" data-i="${i}">${c.sw ? `<span class="swatch" style="background:${c.sw}"></span>` : ''}${c.t}</button>`
+      ).join('');
+      openCard(`
+        <h2>${q.title}</h2>
+        <div class="hint">${q.hint}</div>
+        <div class="bubble">${q.prompt}</div>
+        <div class="choices">${choiceHtml}</div>
+        <div class="feedback" id="fb"></div>
+      `);
+      const fb = document.getElementById('fb');
+      card.querySelectorAll('.choice').forEach((btn) => {
+        btn.onclick = () => {
+          const c = q.choices[+btn.dataset.i];
+          if (c.ok) {
+            btn.classList.add('right');
+            chime(true);
+            speak(q.anyOk ? (type === 'colour' ? 'My favourite colour is ' + c.t : type === 'book' ? 'My favourite book is ' + c.t : 'My favourite character is ' + c.t) : c.t);
+            fb.className = 'feedback good';
+            fb.textContent = 'Great English! Well done, Sveta!';
+            card.querySelectorAll('.choice').forEach((b) => b.disabled = true);
+            setTimeout(() => { closeCard(); resolve(); }, 1800);
+          } else {
+            btn.classList.add('wrong');
+            chime(false);
+            fb.className = 'feedback bad';
+            fb.textContent = 'Not quite. Try again!';
+          }
+        };
+      });
+    });
+  }
+
+  function showEvent(kind, text, move) {
+    return new Promise((resolve) => {
+      whistle();
+      const sign = move > 0 ? 'Move forward' : 'Step back';
+      openCard(`
+        <h2>${kind === 'frog' ? 'Chocolate Frog!' : 'Trolley Witch!'}</h2>
+        <div class="event-box ${kind}">${text}</div>
+        <div class="hint">${kind === 'frog' ? '🐸 Hop, hop, hop!' : '🧹 Mind the trolley!'}</div>
+        <div class="btn-row"><button class="big" id="ok">Continue</button></div>
+      `);
+      document.getElementById('ok').onclick = () => { closeCard(); resolve(); };
+    });
+  }
+
+  // ---------- Main turn ----------
+  async function landOn(i) {
+    visited.add(i);
+    updateHUD();
+    if (i >= FINISH) return;
+    if (questions[i]) {
+      setBanner('Question time!');
+      await askQuestion(questions[i].type);
+      setBanner('All aboard! Keep going');
+    } else if (specials[i]) {
+      const s = specials[i];
+      setBanner(s.kind === 'frog' ? 'A Chocolate Frog hopped ahead!' : 'The Trolley Witch is in the way!');
+      await showEvent(s.kind, s.text, s.move);
+      const target = Math.max(0, Math.min(FINISH, pos + s.move));
+      if (target !== pos) {
+        setStatus(s.move > 0 ? 'Moving forward...' : 'Stepping back...');
+        await stepTo(target);
+        if (target >= FINISH) return;
+        // resolve landing at the new tile (questions only, no chain specials)
+        if (questions[pos]) {
+          setBanner('Question time!');
+          await askQuestion(questions[pos].type);
+        }
+      }
+    }
+  }
+
+  async function takeTurn() {
+    if (busy) return;
+    busy = true;
+    ctx();
+    if (!started) {
+      started = true;
+      whistle();
+      setBanner('Next stop: Hogwarts! Good luck, Sveta!');
+    }
+    const btn = document.getElementById('rollBtn');
+    btn.disabled = true;
+    setStatus('Rolling the dice...');
+    const roll = await rollDice();
+    setStatus(`You rolled a ${roll}! Chugga chugga...`);
+    steam();
+    whistle();
+    const target = Math.min(FINISH, pos + roll);
+    await stepTo(target);
+    await wait(300);
+    if (pos >= FINISH) {
+      await finale();
+      busy = false;
+      return;
+    }
+    await landOn(pos);
+    if (pos >= FINISH) {
+      await finale();
+      busy = false;
+      return;
+    }
+    setStatus(pos === 0 ? 'Press the button to punch your ticket!' : `You are at station ${pos}. Punch your ticket again!`);
+    btn.disabled = false;
+    busy = false;
+  }
+
+  // ---------- Finale ----------
+  function finale() {
+    return new Promise((resolve) => {
+      setBanner('Arrived at Hogwarts!');
+      setStatus('You made it to Hogwarts!');
+      steam();
+      whistle();
+      const f = document.getElementById('finale');
+      const candles = document.getElementById('candles');
+      candles.innerHTML = '';
+      for (let i = 0; i < 7; i++) {
+        const c = document.createElement('div');
+        c.className = 'candle';
+        c.innerHTML = '<div class="flame"></div><div class="stick"></div>';
+        candles.appendChild(c);
+      }
+      f.classList.add('show');
+      setTimeout(fanfare, 400);
+      const colours = ['#d3a625', '#740001', '#f5d76e', '#c0392b', '#1d4f9c', '#1f7a4d'];
+      for (let i = 0; i < 90; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.background = colours[i % colours.length];
+        c.style.animationDuration = (2.5 + Math.random() * 3) + 's';
+        c.style.animationDelay = (Math.random() * 1.5) + 's';
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 6000);
+      }
+      const ms = document.createElement('div');
+      resolve();
+    });
+  }
+
+  // ---------- Init ----------
+  document.getElementById('rollBtn').addEventListener('click', takeTurn);
+  document.getElementById('restartBtn').addEventListener('click', () => {
+    document.getElementById('finale').classList.remove('show');
+    pos = 0; visited = new Set(); answeredOnce = new Set(); started = false; busy = false;
+    setBanner('All aboard! Next stop: adventure');
+    setStatus('Press the button to punch your ticket and roll the dice!');
+    document.getElementById('dice').textContent = '?';
+    document.getElementById('rollBtn').disabled = false;
+    placeTrain(false);
+    updateHUD();
+  });
+
+  function layout() {
+    drawRails();
+    placeTrain(false);
+  }
+
+  buildStations();
+  drawRails();
+  placeTrain(false);
+  updateHUD();
+  window.addEventListener('resize', layout);
+})();
+</script>
+</body>
+</html>
