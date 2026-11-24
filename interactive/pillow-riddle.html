@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Snape's Riddle: The Potions Dungeon</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    color: #3a1410;
+    background: radial-gradient(ellipse at center, #3b0a12 0%, #1a0306 70%, #0b0103 100%);
+    touch-action: manipulation;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
+    overflow-x: hidden;
+  }
+  #runes-bg { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+  #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+  .wrap {
+    position: relative; z-index: 1; min-height: 100%; display: flex; flex-direction: column;
+    align-items: center; padding: max(18px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+    gap: 18px;
+  }
+  h1 {
+    font-family: 'Palatino Linotype', Georgia, serif; font-size: clamp(26px, 5vw, 46px); margin: 6px 0 0;
+    color: #ffd873; text-align: center; letter-spacing: 2px;
+    text-shadow: 0 0 10px #ff9a1f, 0 0 22px #b3001b, 0 2px 0 #5a2000;
+  }
+  .subtitle { color: #f5c96b; font-style: italic; font-size: clamp(15px, 2.6vw, 20px); margin-top: -10px; text-align: center; }
+
+  /* Parchment card */
+  .parchment {
+    position: relative; width: 100%; max-width: 820px; padding: clamp(22px, 4vw, 40px);
+    border-radius: 14px;
+    background:
+      radial-gradient(ellipse at 20% 15%, rgba(255,255,255,0.35), transparent 55%),
+      radial-gradient(ellipse at 85% 90%, rgba(120,70,20,0.35), transparent 60%),
+      linear-gradient(160deg, #f6e7bf 0%, #e9cf91 45%, #d9b76c 100%);
+    box-shadow:
+      0 0 0 4px #5b0a14,
+      0 0 0 7px #d4a441,
+      0 0 0 9px #7a0f1c,
+      0 0 30px 8px rgba(255,140,30,0.55),
+      inset 0 0 60px rgba(120,60,10,0.35);
+    border-image: none;
+  }
+  .parchment::before, .parchment::after {
+    content: '\2766'; position: absolute; color: #8a5a00; font-size: 26px; text-shadow: 0 0 6px #ffd873;
+  }
+  .parchment::before { top: 8px; left: 12px; }
+  .parchment::after { bottom: 8px; right: 12px; transform: rotate(180deg); }
+  .gold-rule { height: 10px; margin: 10px 0; background:
+    linear-gradient(90deg, transparent, #b8860b, #ffd873, #b8860b, transparent);
+    border-radius: 6px; opacity: 0.8; }
+  .riddle {
+    font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif; font-style: italic;
+    font-size: clamp(20px, 3.6vw, 30px); line-height: 1.6; text-align: center; color: #4a1208; margin: 6px 0;
+  }
+  .riddle .glow { color: #7a0010; text-shadow: 0 0 8px rgba(255,190,80,0.9); }
+
+  .stage-title { font-family: Georgia, serif; font-size: clamp(18px, 3vw, 24px); text-align: center; color: #6b0c16; margin: 4px 0 12px; font-weight: bold; }
+  .hint { text-align: center; font-size: clamp(15px, 2.4vw, 18px); color: #5a2a10; font-style: italic; min-height: 1.4em; }
+
+  /* Stage 1: picture cards */
+  .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; width: 100%; max-width: 620px; }
+  .card {
+    min-height: 120px; border-radius: 14px; border: 3px solid #7a0f1c;
+    background: linear-gradient(160deg, #5b0a14, #2a0508);
+    color: #ffd873; font-size: clamp(18px, 3vw, 24px); font-family: Georgia, serif;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    box-shadow: 0 0 14px rgba(255,160,40,0.45), inset 0 0 14px rgba(255,200,80,0.15);
+    cursor: pointer; transition: transform 0.15s ease; touch-action: manipulation;
+  }
+  .card:active { transform: scale(0.96); }
+  .card .emoji { font-size: clamp(40px, 7vw, 56px); line-height: 1; }
+  .card.wrong { animation: shake 0.45s; border-color: #ff3b30; }
+  .card.right { border-color: #ffd873; box-shadow: 0 0 26px #ffd873; }
+  .card.hidden { visibility: hidden; }
+
+  /* Stage 2: runes */
+  .slots { display: flex; gap: clamp(6px, 1.5vw, 12px); justify-content: center; flex-wrap: wrap; }
+  .slot {
+    width: clamp(46px, 10vw, 70px); height: clamp(56px, 12vw, 84px); border-radius: 10px;
+    border: 2px dashed #7a4a10; background: rgba(90,40,10,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Palatino Linotype', Georgia, serif; font-size: clamp(28px, 6vw, 44px); font-weight: bold; color: #5b0a14;
+  }
+  .slot.filled { border: 2px solid #b8860b; background: linear-gradient(160deg, #ffe9a8, #d9a441); box-shadow: 0 0 12px #ffb347; }
+  .rune-bank { display: grid; grid-template-columns: repeat(6, 1fr); gap: clamp(8px, 2vw, 14px); width: 100%; max-width: 620px; }
+  .rune {
+    aspect-ratio: 1 / 1; border-radius: 50%;
+    border: 3px solid #d4a441; background: radial-gradient(circle at 35% 30%, #8a1424, #3a0810 75%);
+    color: #ffd873; font-family: 'Palatino Linotype', Georgia, serif; font-size: clamp(26px, 5vw, 40px); font-weight: bold;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    box-shadow: 0 0 14px rgba(255,150,40,0.6), inset 0 0 10px rgba(255,200,100,0.2);
+    transition: transform 0.12s ease, opacity 0.3s ease;
+    touch-action: manipulation;
+  }
+  .rune:active { transform: scale(0.92); }
+  .rune.used { opacity: 0.15; pointer-events: none; }
+  .rune.pulse { animation: pulse 1.2s ease-in-out infinite; }
+
+  /* Buttons */
+  .btn {
+    min-height: 60px; min-width: 200px; padding: 14px 28px; border-radius: 40px; border: 3px solid #ffd873;
+    background: linear-gradient(180deg, #a3152a, #5b0a14); color: #ffe9a8;
+    font-family: Georgia, serif; font-size: clamp(18px, 3vw, 24px); font-weight: bold; letter-spacing: 1px;
+    box-shadow: 0 0 18px rgba(255,170,40,0.6); cursor: pointer; touch-action: manipulation;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn.ghost { background: transparent; border-color: #b8860b; color: #ffd873; font-size: clamp(16px, 2.6vw, 20px); min-height: 50px; }
+
+  /* Snape message */
+  #snape {
+    display: none; width: 100%; max-width: 820px; padding: 22px; border-radius: 14px;
+    background: rgba(12,2,4,0.85); border: 2px solid #b8860b; color: #ffe9a8;
+    box-shadow: 0 0 24px rgba(255,140,30,0.5);
+    text-align: center; font-size: clamp(18px, 3vw, 24px); line-height: 1.5;
+  }
+  #snape .name { color: #ffd873; font-weight: bold; font-size: clamp(20px, 3.4vw, 28px); letter-spacing: 1px; }
+  #snape.show { display: block; animation: fadeUp 0.9s ease both; }
+
+  /* Pillow reveal */
+  #reveal { display: none; position: relative; width: 100%; max-width: 620px; height: 340px; }
+  #reveal.show { display: block; }
+  .compartment {
+    position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%);
+    width: 300px; height: 90px; border-radius: 18px 18px 40px 40px;
+    background: radial-gradient(ellipse at center, #2a0508 0%, #0d0102 80%);
+    border: 3px solid #b8860b; box-shadow: inset 0 0 30px #000, 0 0 30px rgba(255,190,60,0.6);
+  }
+  .compartment .clue { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 42px; opacity: 0; transition: opacity 1s ease 1.6s; }
+  #reveal.open .compartment .clue { opacity: 1; }
+  .pillow {
+    position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%);
+    width: 300px; height: 150px; border-radius: 50% 50% 46% 46% / 60% 60% 40% 40%;
+    background: radial-gradient(ellipse at 35% 30%, #fff3b8 0%, #ffd34d 40%, #c88a12 100%);
+    box-shadow: 0 0 40px 10px rgba(255,200,60,0.75), inset 0 -10px 20px rgba(120,60,0,0.35);
+    transition: transform 1.8s cubic-bezier(.2,.9,.3,1.2), opacity 1.2s ease;
+    border: 2px solid #8a5a00;
+  }
+  #reveal.open .pillow { transform: translate(-50%, -150px) rotate(-8deg); opacity: 0.95; }
+  #reveal.open .pillow::after { opacity: 0; }
+  .pillow::after {
+    content: '\2728'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 48px;
+  }
+
+  .controls { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+  .hidden-screen { display: none !important; }
+  .panel { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+
+  @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(10px)} 60%{transform:translateX(-8px)} 80%{transform:translateX(6px)} }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 12px rgba(255,150,40,0.5)} 50%{box-shadow:0 0 28px rgba(255,220,100,1)} }
+  @keyframes fadeUp { from{opacity:0; transform:translateY(20px)} to{opacity:1; transform:none} }
+  @keyframes flicker { 0%,100%{opacity:1} 50%{opacity:0.7} }
+  .flicker { animation: flicker 2.4s ease-in-out infinite; }
+
+  @media (orientation: portrait) and (max-width: 900px) {
+    .rune-bank { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+<canvas id="runes-bg"></canvas>
+<canvas id="fx"></canvas>
+
+<div class="wrap">
+  <h1 class="flicker">Snape's Riddle</h1>
+  <div class="subtitle">The Potions Dungeon &middot; Miss Sveta Gryffindor</div>
+
+  <section class="parchment" id="riddle-card">
+    <div class="riddle">
+      <span class="glow">I have no voice, but I bring you dreams.</span><br>
+      I have no bones, but I hold your head.<br>
+      You visit me when the day is dead...
+    </div>
+    <div class="gold-rule"></div>
+
+    <!-- STAGE 1: choose the answer -->
+    <div class="panel" id="stage1">
+      <div class="stage-title">Choose the answer, young witch</div>
+      <div class="cards" id="cards"></div>
+      <div class="hint" id="hint1">Tap the picture you think is the answer.</div>
+    </div>
+
+    <!-- STAGE 2: spell the word -->
+    <div class="panel hidden-screen" id="stage2">
+      <div class="stage-title">Now spell the answer with the runes</div>
+      <div class="slots" id="slots"></div>
+      <div class="rune-bank" id="runes"></div>
+      <div class="hint" id="hint2">Tap the runes in order: P - I - L - L - O - W</div>
+      <div class="controls">
+        <button class="btn ghost" id="undo">Undo Rune</button>
+        <button class="btn ghost" id="clear">Clear All</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="snape" aria-live="polite">
+    <div class="name">Professor Snape</div>
+    <p id="snape-text">Correct, Miss Sveta. Look under your pillow now! Your next artifact awaits!</p>
+  </section>
+
+  <section id="reveal">
+    <div class="compartment"><div class="clue">&#x1F5DD;</div></div>
+    <div class="pillow"></div>
+  </section>
+
+  <div class="controls" id="replay-wrap" style="display:none">
+    <button class="btn ghost" id="replay">Cast the Spell Again</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- Audio (Web Audio API) ---------- */
+  var AC = window.AudioContext || window.webkitAudioContext;
+  var ctx = null;
+  function ensureAudio() {
+    if (!AC) return null;
+    if (!ctx) ctx = new AC();
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  }
+  function tone(freq, start, dur, vol, type) {
+    var c = ensureAudio(); if (!c) return;
+    var o = c.createOscillator(), g = c.createGain();
+    o.type = type || 'sine'; o.frequency.value = freq;
+    var t = c.currentTime + start;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol || 0.2, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(c.destination);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+  function chime(note) {
+    var base = { C: 1046.5, D: 1174.7, E: 1318.5, G: 1568, A: 1760 }[note] || 1046.5;
+    tone(base, 0, 0.6, 0.12, 'sine');
+    tone(base * 2, 0.02, 0.4, 0.04, 'triangle');
+  }
+  function harpChord() {
+    var notes = [261.6, 329.6, 392, 523.3, 659.3, 784];
+    notes.forEach(function (f, i) { tone(f, i * 0.09, 2.2, 0.09, 'triangle'); });
+    setTimeout(function () { [392, 523.3, 659.3, 783.99].forEach(function (f, i) { tone(f, i * 0.07, 2.6, 0.06, 'sine'); }); }, 350);
+  }
+  function errorBuzz() { tone(180, 0, 0.25, 0.1, 'sawtooth'); }
+  function click() { tone(900, 0, 0.08, 0.05, 'sine'); }
+
+  /* ---------- Background runes ---------- */
+  var bg = document.getElementById('runes-bg'), bgc = bg.getContext('2d');
+  var fx = document.getElementById('fx'), fxc = fx.getContext('2d');
+  var W = 0, H = 0, DPR = Math.min(window.devicePixelRatio || 1, 2);
+  function resize() {
+    W = window.innerWidth; H = window.innerHeight;
+    [bg, fx].forEach(function (cv) {
+      cv.width = W * DPR; cv.height = H * DPR;
+      cv.style.width = W + 'px'; cv.style.height = H + 'px';
+    });
+    bgc.setTransform(DPR, 0, 0, DPR, 0, 0); fxc.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  window.addEventListener('resize', resize); resize();
+
+  var RUNE_CHARS = ['\u16A0','\u16A2','\u16A6','\u16B1','\u16B9','\u16BE','\u16C7','\u16D2','\u2726','\u2727','\u2736'];
+  var floaters = [];
+  for (var i = 0; i < 46; i++) floaters.push(newFloater(true));
+  function newFloater(anyY) {
+    return {
+      x: Math.random() * (W || 800), y: anyY ? Math.random() * (H || 1000) : (H + 20),
+      vy: -(0.12 + Math.random() * 0.35), vx: (Math.random() - 0.5) * 0.2,
+      size: 12 + Math.random() * 20, ch: RUNE_CHARS[Math.floor(Math.random() * RUNE_CHARS.length)],
+      a: 0.15 + Math.random() * 0.4, ph: Math.random() * 6.28
+    };
+  }
+  function drawBg(t) {
+    bgc.clearRect(0, 0, W, H);
+    floaters.forEach(function (f) {
+      f.y += f.vy; f.x += f.vx + Math.sin(t / 1000 + f.ph) * 0.2;
+      if (f.y < -30) { Object.assign(f, newFloater(false)); }
+      var alpha = f.a * (0.6 + 0.4 * Math.sin(t / 700 + f.ph));
+      bgc.fillStyle = 'rgba(255,190,90,' + alpha.toFixed(3) + ')';
+      bgc.shadowColor = 'rgba(255,140,30,0.9)'; bgc.shadowBlur = 10;
+      bgc.font = f.size + 'px serif';
+      bgc.fillText(f.ch, f.x, f.y);
+    });
+    bgc.shadowBlur = 0;
+  }
+
+  /* ---------- Particle burst / sparkles ---------- */
+  var parts = [];
+  function burst(cx, cy, count, palette) {
+    for (var i = 0; i < count; i++) {
+      var a = Math.random() * Math.PI * 2, s = 2 + Math.random() * 9;
+      parts.push({
+        x: cx, y: cy, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 2,
+        life: 1, decay: 0.008 + Math.random() * 0.014,
+        r: 1.5 + Math.random() * 3.5,
+        c: palette[Math.floor(Math.random() * palette.length)],
+        star: Math.random() < 0.35
+      });
+    }
+  }
+  function confettiRain(duration) {
+    var start = performance.now();
+    var timer = setInterval(function () {
+      var t = performance.now() - start;
+      if (t > duration) { clearInterval(timer); return; }
+      for (var k = 0; k < 6; k++) {
+        parts.push({
+          x: Math.random() * W, y: -10, vx: (Math.random() - 0.5) * 2, vy: 2 + Math.random() * 4,
+          life: 1, decay: 0.002, r: 3 + Math.random() * 4,
+          c: ['#ffd873', '#ff9a1f', '#b3001b', '#fff3b8', '#d4a441'][k % 5],
+          star: false, spin: Math.random() * 6
+        });
+      }
+    }, 60);
+  }
+  function drawStar(c, x, y, r) {
+    c.beginPath();
+    for (var i = 0; i < 10; i++) {
+      var rad = i % 2 === 0 ? r : r * 0.45, a = Math.PI / 5 * i - Math.PI / 2;
+      c.lineTo(x + Math.cos(a) * rad, y + Math.sin(a) * rad);
+    }
+    c.closePath(); c.fill();
+  }
+  function drawFx() {
+    fxc.clearRect(0, 0, W, H);
+    for (var i = parts.length - 1; i >= 0; i--) {
+      var p = parts[i];
+      p.vy += 0.12; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.life -= p.decay;
+      if (p.life <= 0 || p.y > H + 30) { parts.splice(i, 1); continue; }
+      fxc.globalAlpha = Math.max(0, p.life);
+      fxc.fillStyle = p.c; fxc.shadowColor = p.c; fxc.shadowBlur = 12;
+      if (p.star) drawStar(fxc, p.x, p.y, p.r * 2);
+      else { fxc.beginPath(); fxc.arc(p.x, p.y, p.r, 0, 6.283); fxc.fill(); }
+    }
+    fxc.globalAlpha = 1; fxc.shadowBlur = 0;
+  }
+  var last = 0;
+  function loop(t) {
+    drawBg(t); drawFx();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  /* ---------- Game logic ---------- */
+  var WORD = ['P', 'I', 'L', 'L', 'O', 'W'];
+  var CARDS = [
+    { label: 'A Book', emoji: '\uD83D\uDCD6', ok: false },
+    { label: 'A Pillow', emoji: '\uD83D\uDECF\uFE0F', ok: true },
+    { label: 'A Cauldron', emoji: '\uD83E\uDD58', ok: false },
+    { label: 'A Wand', emoji: '\uD83E\uDE84', ok: false }
+  ];
+  var state = { stage: 1, spelled: [], bankOrder: [], solved: false };
+
+  var el = {
+    cards: document.getElementById('cards'),
+    stage1: document.getElementById('stage1'),
+    stage2: document.getElementById('stage2'),
+    slots: document.getElementById('slots'),
+    runes: document.getElementById('runes'),
+    hint1: document.getElementById('hint1'),
+    hint2: document.getElementById('hint2'),
+    snape: document.getElementById('snape'),
+    snapeText: document.getElementById('snape-text'),
+    reveal: document.getElementById('reveal'),
+    replayWrap: document.getElementById('replay-wrap'),
+    riddle: document.getElementById('riddle-card')
+  };
+
+  function shuffle(a) {
+    var b = a.slice();
+    for (var i = b.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = b[i]; b[i] = b[j]; b[j] = t; }
+    return b;
+  }
+
+  function buildCards() {
+    el.cards.innerHTML = '';
+    shuffle(CARDS).forEach(function (c) {
+      var d = document.createElement('button');
+      d.className = 'card';
+      d.type = 'button';
+      d.innerHTML = '<span class="emoji">' + c.emoji + '</span><span>' + c.label + '</span>';
+      d.addEventListener('click', function (e) { e.preventDefault(); onCard(d, c); });
+      el.cards.appendChild(d);
+    });
+  }
+
+  function onCard(node, c) {
+    if (state.stage !== 1) return;
+    ensureAudio(); click();
+    if (c.ok) {
+      node.classList.add('right');
+      chime('E'); setTimeout(function () { chime('G'); }, 120);
+      el.hint1.textContent = 'A pillow indeed! Now spell the magic word.';
+      var r = node.getBoundingClientRect();
+      burst(r.left + r.width / 2, r.top + r.height / 2, 40, ['#ffd873', '#fff3b8', '#ff9a1f']);
+      state.stage = 2;
+      setTimeout(showStage2, 900);
+    } else {
+      node.classList.add('wrong'); errorBuzz();
+      el.hint1.textContent = 'Not quite, young witch. Look again and try another picture.';
+      setTimeout(function () { node.classList.remove('wrong'); }, 500);
+    }
+  }
+
+  function showStage2() {
+    el.stage1.classList.add('hidden-screen');
+    el.stage2.classList.remove('hidden-screen');
+    state.spelled = [];
+    state.bankOrder = shuffle(WORD.map(function (ch, idx) { return { ch: ch, id: idx }; }));
+    renderSlots(); renderRunes();
+  }
+
+  function renderSlots() {
+    el.slots.innerHTML = '';
+    for (var i = 0; i < WORD.length; i++) {
+      var s = document.createElement('div');
+      s.className = 'slot' + (i < state.spelled.length ? ' filled' : '');
+      s.textContent = i < state.spelled.length ? state.spelled[i].ch : '';
+      el.slots.appendChild(s);
+    }
+  }
+
+  function renderRunes() {
+    el.runes.innerHTML = '';
+    var usedIds = state.spelled.map(function (s) { return s.id; });
+    state.bankOrder.forEach(function (r) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'rune pulse';
+      b.textContent = r.ch;
+      if (usedIds.indexOf(r.id) !== -1) b.classList.add('used');
+      b.addEventListener('click', function (e) { e.preventDefault(); onRune(r, b); });
+      el.runes.appendChild(b);
+    });
+  }
+
+  function onRune(r, node) {
+    if (state.solved) return;
+    ensureAudio();
+    var expected = WORD[state.spelled.length];
+    if (r.ch === expected) {
+      state.spelled.push(r);
+      chime(['C', 'D', 'E', 'G', 'A', 'C'][state.spelled.length - 1]);
+      var rect = node.getBoundingClientRect();
+      burst(rect.left + rect.width / 2, rect.top + rect.height / 2, 18, ['#ffd873', '#ff9a1f']);
+      renderSlots(); renderRunes();
+      el.hint2.textContent = state.spelled.length < WORD.length ? 'Yes! Keep going...' : '';
+      if (state.spelled.length === WORD.length) { solve(); }
+    } else {
+      errorBuzz();
+      node.style.animation = 'shake 0.4s';
+      setTimeout(function () { node.style.animation = ''; }, 420);
+      el.hint2.textContent = 'Not that rune yet. Look for the next letter of the word.';
+    }
+  }
+
+  document.getElementById('undo').addEventListener('click', function () {
+    if (state.solved || !state.spelled.length) return;
+    ensureAudio(); click();
+    state.spelled.pop(); renderSlots(); renderRunes();
+    el.hint2.textContent = 'Undone. Keep spelling.';
+  });
+  document.getElementById('clear').addEventListener('click', function () {
+    if (state.solved) return;
+    ensureAudio(); click();
+    state.spelled = []; renderSlots(); renderRunes();
+    el.hint2.textContent = 'Cleared. Start again with P.';
+  });
+
+  function solve() {
+    state.solved = true;
+    el.hint2.textContent = 'P-I-L-L-O-W! The magic is awake!';
+    harpChord();
+    var w = W, h = H;
+    var pal = ['#ffd873', '#ff9a1f', '#b3001b', '#fff3b8', '#d4a441', '#ff5a3c'];
+    setTimeout(function () { burst(w * 0.5, h * 0.35, 120, pal); }, 100);
+    setTimeout(function () { burst(w * 0.25, h * 0.5, 80, pal); }, 500);
+    setTimeout(function () { burst(w * 0.75, h * 0.5, 80, pal); }, 800);
+    confettiRain(3500);
+    setTimeout(showSnape, 1400);
+    setTimeout(startReveal, 3200);
+  }
+
+  function showSnape() {
+    el.snape.classList.add('show');
+    el.snapeText.textContent = 'Correct, Miss Sveta. Look under your pillow now! Your next artifact awaits!';
+    el.snape.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function startReveal() {
+    el.reveal.classList.add('show');
+    el.reveal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(function () {
+      el.reveal.classList.add('open');
+      harpChord();
+      var r = el.reveal.getBoundingClientRect();
+      burst(r.left + r.width / 2, r.top + r.height * 0.3, 60, ['#ffd873', '#fff3b8']);
+    }, 300);
+    setTimeout(function () { el.replayWrap.style.display = 'flex'; }, 3500);
+  }
+
+  document.getElementById('replay').addEventListener('click', function () {
+    ensureAudio(); click();
+    state = { stage: 1, spelled: [], bankOrder: [], solved: false };
+    el.snape.classList.remove('show');
+    el.reveal.classList.remove('show', 'open');
+    el.replayWrap.style.display = 'none';
+    el.stage2.classList.add('hidden-screen');
+    el.stage1.classList.remove('hidden-screen');
+    el.hint1.textContent = 'Tap the picture you think is the answer.';
+    el.hint2.textContent = 'Tap the runes in order: P - I - L - L - O - W';
+    buildCards();
+    el.riddle.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  buildCards();
+  // Prime audio on first touch (iOS Safari requires a user gesture)
+  document.addEventListener('touchstart', function once() { ensureAudio(); document.removeEventListener('touchstart', once); }, { passive: true });
+  document.addEventListener('gesturestart', function (e) { e.preventDefault(); }, { passive: false });
+  document.addEventListener('dblclick', function (e) { e.preventDefault(); }, { passive: false });
+})();
+</script>
+</body>
+</html>
