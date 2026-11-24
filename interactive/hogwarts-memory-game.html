@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Hogwarts Memory Quest</title>
+<style>
+  :root {
+    --burgundy-dark: #4a0e17;
+    --burgundy: #740001;
+    --parchment: #f4ecd8;
+    --gold: #d3a625;
+    --gold-light: #eeba30;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    font-family: Georgia, 'Times New Roman', serif;
+    color: var(--burgundy-dark);
+    background:
+      radial-gradient(ellipse at center, rgba(255,255,255,0.35) 0%, rgba(0,0,0,0) 70%),
+      var(--parchment);
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow-x: hidden;
+  }
+  header {
+    text-align: center;
+    padding: 18px 12px 8px;
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(1.6rem, 5vw, 2.8rem);
+    letter-spacing: 0.08em;
+    color: var(--burgundy);
+    text-shadow: 0 2px 0 var(--gold-light), 0 0 12px rgba(211,166,37,0.5);
+  }
+  .subtitle {
+    margin: 6px 0 0;
+    font-style: italic;
+    font-size: clamp(0.95rem, 2.8vw, 1.15rem);
+    color: var(--burgundy-dark);
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    padding: 10px 12px 14px;
+  }
+  .stat {
+    min-width: 110px;
+    padding: 8px 14px;
+    border: 2px solid var(--gold);
+    border-radius: 10px;
+    background: linear-gradient(180deg, #fbf6e6, #efe2bd);
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.5), 0 3px 8px rgba(74,14,23,0.25);
+    text-align: center;
+  }
+  .stat .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--burgundy); }
+  .stat .value { font-size: 1.4rem; font-weight: bold; color: var(--burgundy-dark); font-variant-numeric: tabular-nums; }
+  .btn {
+    min-height: 52px;
+    min-width: 130px;
+    padding: 10px 22px;
+    font-family: inherit;
+    font-size: 1.05rem;
+    font-weight: bold;
+    letter-spacing: 0.06em;
+    color: var(--gold-light);
+    background: linear-gradient(180deg, #8c0a0c, var(--burgundy) 60%, var(--burgundy-dark));
+    border: 2px solid var(--gold);
+    border-radius: 12px;
+    box-shadow: 0 4px 0 var(--burgundy-dark), 0 6px 14px rgba(0,0,0,0.3);
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--burgundy-dark); }
+  .board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: clamp(8px, 2vw, 16px);
+    width: min(96vw, 900px);
+    margin: 0 auto 30px;
+    padding: 6px;
+    perspective: 1200px;
+  }
+  /* 10 cards: 5 columns on wide screens, 2 rows of 5 */
+  @media (min-width: 700px) {
+    .board { grid-template-columns: repeat(5, 1fr); }
+  }
+  @media (max-width: 699px) and (min-width: 420px) {
+    .board { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (max-width: 419px) {
+    .board { grid-template-columns: repeat(3, 1fr); }
+  }
+  .card {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(.4,.2,.2,1);
+    border-radius: 12px;
+    outline: none;
+  }
+  .card.flipped { transform: rotateY(180deg); }
+  .card.matched { cursor: default; }
+  .card.matched .front { box-shadow: 0 0 0 3px var(--gold-light), 0 0 18px var(--gold-light); animation: glow 1.4s ease-in-out infinite alternate; }
+  @keyframes glow { from { filter: brightness(1); } to { filter: brightness(1.15); } }
+  .face {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(74,14,23,0.35);
+  }
+  .back {
+    background:
+      radial-gradient(circle at center, #8c0a0c 0%, var(--burgundy) 55%, var(--burgundy-dark) 100%);
+    border: 3px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .back::before {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border: 1px dashed rgba(238,186,48,0.7);
+    border-radius: 8px;
+  }
+  .back svg { width: 68%; height: 68%; }
+  .front {
+    transform: rotateY(180deg);
+    background: linear-gradient(170deg, #fbf6e6 0%, #efe2bd 100%);
+    border: 3px solid var(--gold);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 8px 12px;
+  }
+  .front .art { flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; min-height: 0; }
+  .front .art svg { width: 82%; height: 82%; max-height: 100%; }
+  .front .name {
+    font-size: clamp(0.8rem, 2.6vw, 1.05rem);
+    font-weight: bold;
+    color: var(--burgundy);
+    text-align: center;
+    line-height: 1.15;
+    letter-spacing: 0.03em;
+  }
+  .card.shake { animation: shake 0.45s; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+  .card.shake.flipped { animation: shakeFlipped 0.45s; }
+  @keyframes shakeFlipped {
+    0%,100% { transform: rotateY(180deg) translateX(0); }
+    20% { transform: rotateY(180deg) translateX(-6px); }
+    40% { transform: rotateY(180deg) translateX(6px); }
+    60% { transform: rotateY(180deg) translateX(-4px); }
+    80% { transform: rotateY(180deg) translateX(4px); }
+  }
+  .footer-note { text-align: center; font-size: 0.85rem; font-style: italic; color: var(--burgundy); padding-bottom: 24px; }
+
+  /* Victory modal */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(40, 6, 12, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 16px;
+  }
+  .overlay.show { display: flex; animation: fadeIn 0.5s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal {
+    position: relative;
+    max-width: 520px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: clamp(20px, 5vw, 36px);
+    background: linear-gradient(170deg, #fbf6e6, var(--parchment) 60%, #e8d6a4);
+    border: 4px double var(--gold);
+    border-radius: 16px;
+    box-shadow: 0 0 40px rgba(238,186,48,0.6), 0 12px 40px rgba(0,0,0,0.5);
+    text-align: center;
+    animation: pop 0.6s cubic-bezier(.2,1.4,.4,1);
+  }
+  @keyframes pop { from { transform: scale(0.5) rotate(-4deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
+  .modal h2 {
+    margin: 0 0 6px;
+    font-size: clamp(1.4rem, 5vw, 2rem);
+    color: var(--burgundy);
+    letter-spacing: 0.06em;
+  }
+  .modal .sub { margin: 0 0 14px; font-style: italic; color: var(--burgundy-dark); }
+  .clue {
+    margin: 16px auto;
+    padding: 16px 18px;
+    background: rgba(116,0,1,0.06);
+    border: 2px solid var(--gold);
+    border-radius: 12px;
+    font-size: 1.02rem;
+    line-height: 1.5;
+    color: var(--burgundy-dark);
+  }
+  .clue strong { color: var(--burgundy); }
+  .stats-final { margin: 10px 0 18px; font-size: 1rem; }
+  .modal .btn { margin-top: 6px; }
+
+  .confetti-piece {
+    position: fixed;
+    top: -20px;
+    width: 10px; height: 14px;
+    z-index: 200;
+    pointer-events: none;
+    animation: fall linear forwards;
+  }
+  @keyframes fall {
+    to { transform: translate3d(var(--dx), 110vh, 0) rotate(720deg); opacity: 0.9; }
+  }
+  .sparkle {
+    position: fixed;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--gold-light);
+    box-shadow: 0 0 10px var(--gold-light);
+    pointer-events: none;
+    z-index: 150;
+    animation: sparkle 0.9s ease-out forwards;
+  }
+  @keyframes sparkle {
+    from { transform: translate(0,0) scale(1); opacity: 1; }
+    to { transform: translate(var(--sx), var(--sy)) scale(0); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>HOGWARTS MEMORY QUEST</h1>
+  <p class="subtitle">Find the magical pairs to reveal the secret clue!</p>
+</header>
+
+<div class="controls">
+  <div class="stat"><div class="label">Moves</div><div class="value" id="moves">0</div></div>
+  <div class="stat"><div class="label">Time</div><div class="value" id="timer">00:00</div></div>
+  <div class="stat"><div class="label">Pairs</div><div class="value" id="pairs">0 / 5</div></div>
+  <button class="btn" id="restart">Restart</button>
+</div>
+
+<main class="board" id="board" aria-label="Memory card board"></main>
+
+<p class="footer-note">Happy 10th Birthday, Sveta!</p>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+  <div class="modal">
+    <h2 id="winTitle">Quest Complete!</h2>
+    <p class="sub">Every magical pair has been found.</p>
+    <div class="clue">
+      <strong>The Angel's Secret Clue:</strong><br>
+      Only a wizard with a kind and pure heart can see what is hidden...
+    </div>
+    <p>Happy 10th Birthday, Sveta! May your year be full of magic, friendship, and bright adventures.</p>
+    <p class="stats-final" id="finalStats"></p>
+    <button class="btn" id="playAgain">Play Again</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- Card definitions (SVG art) ---------- */
+  const GOLD = '#d3a625', GOLD_L = '#eeba30', BURG = '#740001', BURG_D = '#4a0e17';
+
+  const ITEMS = [
+    {
+      id: 'hat', name: 'Sorting Hat',
+      svg: `<svg viewBox="0 0 100 120"><defs><linearGradient id="hatG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a5a66"/><stop offset="1" stop-color="#2b2b33"/></linearGradient></defs>
+        <ellipse cx="50" cy="104" rx="42" ry="10" fill="#2b2b33"/>
+        <path d="M18 104 Q18 60 40 30 Q50 8 62 30 Q82 60 82 104 Z" fill="url(#hatG)" stroke="${GOLD}" stroke-width="2"/>
+        <path d="M18 92 Q50 100 82 92" fill="none" stroke="${GOLD_L}" stroke-width="4"/>
+        <path d="M38 40 Q34 60 40 80" fill="none" stroke="${GOLD_L}" stroke-width="2" opacity="0.7"/>
+        <path d="M52 22 L56 34 L68 34 L58 42 L62 54 L52 46 L42 54 L46 42 L36 34 L48 34 Z" fill="${GOLD_L}" opacity="0.9" transform="translate(-6,6) scale(0.5) translate(40,30)"/>
+      </svg>`
+    },
+    {
+      id: 'snitch', name: 'Golden Snitch',
+      svg: `<svg viewBox="0 0 120 100"><defs><radialGradient id="snG" cx="0.35" cy="0.35" r="0.75"><stop offset="0" stop-color="#fff3b0"/><stop offset="0.5" stop-color="${GOLD_L}"/><stop offset="1" stop-color="${GOLD}"/></radialGradient></defs>
+        <path d="M50 46 C20 10 8 26 10 40 C14 54 30 52 50 50 Z" fill="#f9f3dc" stroke="${GOLD}" stroke-width="1.5"/>
+        <path d="M70 46 C100 10 112 26 110 40 C106 54 90 52 70 50 Z" fill="#f9f3dc" stroke="${GOLD}" stroke-width="1.5"/>
+        <circle cx="60" cy="56" r="26" fill="url(#snG)" stroke="${BURG}" stroke-width="1.5"/>
+        <path d="M40 56 Q60 50 80 56" fill="none" stroke="${BURG}" stroke-width="2" opacity="0.6"/>
+        <ellipse cx="50" cy="46" rx="6" ry="3" fill="#fff" opacity="0.7"/>
+      </svg>`
+    },
+    {
+      id: 'broom', name: 'Broomstick',
+      svg: `<svg viewBox="0 0 120 120"><g transform="rotate(-35 60 60)">
+        <rect x="54" y="8" width="8" height="72" rx="4" fill="#8b5a2b" stroke="#5a3a1a"/>
+        <path d="M44 78 L76 78 L84 116 L36 116 Z" fill="#c9962f" stroke="#7a5418" stroke-width="1.5"/>
+        <path d="M44 90 L80 90 M42 102 L82 102" stroke="#7a5418" stroke-width="1.5" opacity="0.6"/>
+        <path d="M48 78 L40 116 M56 78 L52 116 M64 78 L68 116 M72 78 L80 116" stroke="#9c6f22" stroke-width="1" opacity="0.5"/>
+        <rect x="50" y="70" width="16" height="8" rx="2" fill="${GOLD}"/>
+      </g></svg>`
+    },
+    {
+      id: 'potion', name: 'Magic Potion',
+      svg: `<svg viewBox="0 0 100 120"><defs><linearGradient id="poG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7dffb0"/><stop offset="1" stop-color="#1f8a5a"/></linearGradient></defs>
+        <rect x="40" y="6" width="20" height="16" rx="3" fill="#8b5a2b" stroke="#5a3a1a"/>
+        <path d="M42 22 L42 40 Q20 56 20 82 Q20 110 50 110 Q80 110 80 82 Q80 56 58 40 L58 22 Z" fill="rgba(255,255,255,0.35)" stroke="${GOLD}" stroke-width="2"/>
+        <path d="M26 74 Q26 104 50 104 Q74 104 74 74 Q74 66 50 66 Q26 66 26 74 Z" fill="url(#poG)"/>
+        <circle cx="42" cy="88" r="3" fill="#e8fff2" opacity="0.8"/>
+        <circle cx="58" cy="96" r="2" fill="#e8fff2" opacity="0.8"/>
+        <circle cx="50" cy="78" r="2" fill="#e8fff2" opacity="0.8"/>
+      </svg>`
+    },
+    {
+      id: 'book', name: 'Spellbook',
+      svg: `<svg viewBox="0 0 120 120"><rect x="18" y="22" width="84" height="76" rx="4" fill="${BURG}" stroke="${GOLD}" stroke-width="2"/>
+        <path d="M60 26 L60 94" stroke="${GOLD}" stroke-width="2"/>
+        <path d="M26 32 Q43 28 56 34 L56 90 Q43 84 26 88 Z" fill="#f4ecd8"/>
+        <path d="M64 34 Q77 28 94 32 L94 88 Q77 84 64 90 Z" fill="#f4ecd8"/>
+        <path d="M32 46 Q40 42 50 46 M32 56 Q40 52 50 56 M32 66 Q40 62 50 66" stroke="${BURG}" stroke-width="2" fill="none" opacity="0.7"/>
+        <path d="M70 46 L88 46 M70 56 L88 56 M70 66 L84 66" stroke="${BURG}" stroke-width="2" opacity="0.7"/>
+        <path d="M60 40 L62 46 L68 46 L63 50 L65 56 L60 52 L55 56 L57 50 L52 46 L58 46 Z" fill="${GOLD_L}" transform="translate(0,-2)" opacity="0"/>
+        <circle cx="76" cy="20" r="3" fill="${GOLD_L}"/><circle cx="90" cy="14" r="2" fill="${GOLD_L}"/><circle cx="100" cy="26" r="2.5" fill="${GOLD_L}"/>
+      </svg>`
+    }
+  ];
+
+  // Back-of-card crest: golden filigree with a Gryffindor-style shield
+  const BACK_SVG = `<svg viewBox="0 0 100 130"><g fill="none" stroke="${GOLD_L}" stroke-width="1.6" stroke-linecap="round">
+      <path d="M50 6 C30 18 16 16 8 28 C18 26 26 30 30 40 C20 40 14 48 14 58"/>
+      <path d="M50 6 C70 18 84 16 92 28 C82 26 74 30 70 40 C80 40 86 48 86 58"/>
+      <path d="M14 58 C20 84 34 104 50 124 C66 104 80 84 86 58"/>
+      <path d="M50 22 L50 110" opacity="0.6"/>
+      <path d="M28 66 Q50 56 72 66 Q50 76 28 66 Z" opacity="0.8"/>
+      <circle cx="50" cy="66" r="4" fill="${GOLD_L}" opacity="0.9"/>
+      <path d="M34 90 Q50 100 66 90" opacity="0.7"/>
+      <path d="M50 30 l6 10 l-6 10 l-6 -10 z" opacity="0.8"/>
+      <circle cx="50" cy="6" r="2.5" fill="${GOLD_L}"/>
+    </g></svg>`;
+
+  const PAIR_COUNT = ITEMS.length;
+
+  /* ---------- DOM ---------- */
+  const boardEl = document.getElementById('board');
+  const movesEl = document.getElementById('moves');
+  const timerEl = document.getElementById('timer');
+  const pairsEl = document.getElementById('pairs');
+  const overlay = document.getElementById('overlay');
+  const finalStats = document.getElementById('finalStats');
+  const restartBtn = document.getElementById('restart');
+  const playAgainBtn = document.getElementById('playAgain');
+
+  /* ---------- State ---------- */
+  let cards = [];
+  let first = null, second = null;
+  let lock = false;
+  let moves = 0;
+  let matched = 0;
+  let timerId = null;
+  let startTime = 0;
+  let elapsed = 0;
+  let finished = false;
+
+  /* ---------- Audio (Web Audio API, no files) ---------- */
+  let audioCtx = null;
+  function ctx() {
+    if (!audioCtx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) audioCtx = new AC();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+  function tone(freq, start, dur, type, vol) {
+    const c = ctx(); if (!c) return;
+    const o = c.createOscillator();
+    const g = c.createGain();
+    o.type = type || 'sine';
+    o.frequency.setValueAtTime(freq, c.currentTime + start);
+    g.gain.setValueAtTime(0.0001, c.currentTime + start);
+    g.gain.exponentialRampToValueAtTime(vol || 0.15, c.currentTime + start + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + start + dur);
+    o.connect(g); g.connect(c.destination);
+    o.start(c.currentTime + start);
+    o.stop(c.currentTime + start + dur + 0.05);
+  }
+  function sfxFlip() {
+    const c = ctx(); if (!c) return;
+    const len = Math.floor(c.sampleRate * 0.12);
+    const buf = c.createBuffer(1, len, c.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+    const src = c.createBufferSource();
+    const f = c.createBiquadFilter();
+    const g = c.createGain();
+    f.type = 'bandpass'; f.frequency.value = 1800; f.Q.value = 0.8;
+    g.gain.value = 0.25;
+    src.buffer = buf; src.connect(f); f.connect(g); g.connect(c.destination);
+    src.start();
+  }
+  function sfxMatch() {
+    tone(880, 0, 0.5, 'sine', 0.18);
+    tone(1174.66, 0.08, 0.5, 'sine', 0.14);
+    tone(1567.98, 0.16, 0.7, 'triangle', 0.10);
+    tone(2349.32, 0.24, 0.9, 'sine', 0.05);
+  }
+  function sfxMismatch() {
+    tone(220, 0, 0.18, 'sine', 0.08);
+    tone(180, 0.1, 0.2, 'sine', 0.06);
+  }
+  function sfxWin() {
+    const notes = [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5, 1318.5, 1568];
+    notes.forEach((n, i) => tone(n, i * 0.13, 0.6, 'triangle', 0.16));
+    for (let i = 0; i < 14; i++) {
+      tone(2000 + Math.random() * 2500, 0.9 + i * 0.07 + Math.random() * 0.05, 0.25, 'sine', 0.05);
+    }
+  }
+
+  /* ---------- Helpers ---------- */
+  function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  function fmt(s) {
+    const m = Math.floor(s / 60), sec = s % 60;
+    return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+  }
+  function startTimer() {
+    stopTimer();
+    startTime = Date.now() - elapsed * 1000;
+    timerId = setInterval(() => {
+      elapsed = Math.floor((Date.now() - startTime) / 1000);
+      timerEl.textContent = fmt(elapsed);
+    }, 250);
+  }
+  function stopTimer() {
+    if (timerId) { clearInterval(timerId); timerId = null; }
+  }
+  function updateHud() {
+    movesEl.textContent = moves;
+    pairsEl.textContent = matched + ' / ' + PAIR_COUNT;
+  }
+
+  /* ---------- Build board ---------- */
+  function buildDeck() {
+    const deck = [];
+    ITEMS.forEach((it) => {
+      deck.push({ key: it.id, item: it });
+      deck.push({ key: it.id, item: it });
+    });
+    return shuffle(deck);
+  }
+
+  function renderBoard() {
+    boardEl.innerHTML = '';
+    cards = buildDeck();
+    cards.forEach((c, idx) => {
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.setAttribute('role', 'button');
+      el.setAttribute('tabindex', '0');
+      el.setAttribute('aria-label', 'Hidden card');
+      el.dataset.index = idx;
+      el.innerHTML =
+        '<div class="face back">' + BACK_SVG + '</div>' +
+        '<div class="face front"><div class="art">' + c.item.svg + '</div><div class="name">' + c.item.name + '</div></div>';
+      el.addEventListener('click', () => onCardTap(el));
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCardTap(el); }
+      });
+      boardEl.appendChild(el);
+      c.el = el;
+    });
+  }
+
+  /* ---------- Game logic ---------- */
+  function onCardTap(el) {
+    if (lock || finished) return;
+    const idx = Number(el.dataset.index);
+    const card = cards[idx];
+    if (card.el.classList.contains('flipped') || card.el.classList.contains('matched')) return;
+
+    ctx();
+    if (!timerId && !finished && matched === 0 && moves === 0) startTimer();
+
+    card.el.classList.add('flipped');
+    card.el.setAttribute('aria-label', card.item.name);
+    sfxFlip();
+
+    if (!first) { first = card; return; }
+
+    second = card;
+    moves++;
+    updateHud();
+    lock = true;
+
+    if (first.key === second.key) {
+      setTimeout(() => handleMatch(), 350);
+    } else {
+      setTimeout(() => handleMismatch(), 800);
+    }
+  }
+
+  function handleMatch() {
+    sfxMatch();
+    first.el.classList.add('matched');
+    second.el.classList.add('matched');
+    first.el.setAttribute('aria-disabled', 'true');
+    second.el.setAttribute('aria-disabled', 'true');
+    sparkleAt(first.el);
+    sparkleAt(second.el);
+    matched++;
+    updateHud();
+    first = second = null;
+    lock = false;
+    if (matched === PAIR_COUNT) setTimeout(win, 600);
+  }
+
+  function handleMismatch() {
+    sfxMismatch();
+    [first, second].forEach((c) => {
+      c.el.classList.add('shake');
+      setTimeout(() => c.el.classList.remove('shake'), 500);
+    });
+    first.el.classList.remove('flipped');
+    second.el.classList.remove('flipped');
+    first.el.setAttribute('aria-label', 'Hidden card');
+    second.el.setAttribute('aria-label', 'Hidden card');
+    first = second = null;
+    setTimeout(() => { lock = false; }, 350);
+  }
+
+  /* ---------- Effects ---------- */
+  function sparkleAt(el) {
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    for (let i = 0; i < 12; i++) {
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      const ang = (Math.PI * 2 * i) / 12;
+      const dist = 40 + Math.random() * 40;
+      s.style.left = cx + 'px';
+      s.style.top = cy + 'px';
+      s.style.setProperty('--sx', Math.cos(ang) * dist + 'px');
+      s.style.setProperty('--sy', Math.sin(ang) * dist + 'px');
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 1000);
+    }
+  }
+  function confetti(count) {
+    const colors = ['#d3a625', '#eeba30', '#740001', '#8c0a0c', '#f4ecd8', '#ffffff'];
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.left = Math.random() * 100 + 'vw';
+      p.style.background = colors[i % colors.length];
+      p.style.setProperty('--dx', (Math.random() * 200 - 100) + 'px');
+      p.style.animationDuration = (2.5 + Math.random() * 2.5) + 's';
+      p.style.animationDelay = (Math.random() * 0.8) + 's';
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 6000);
+    }
+  }
+
+  /* ---------- Win / restart ---------- */
+  function win() {
+    finished = true;
+    stopTimer();
+    sfxWin();
+    confetti(120);
+    finalStats.textContent = 'Completed in ' + moves + ' moves and ' + fmt(elapsed) + '.';
+    setTimeout(() => overlay.classList.add('show'), 400);
+  }
+
+  function restart() {
+    stopTimer();
+    overlay.classList.remove('show');
+    first = second = null;
+    lock = false;
+    moves = 0;
+    matched = 0;
+    elapsed = 0;
+    finished = false;
+    timerEl.textContent = '00:00';
+    updateHud();
+    renderBoard();
+  }
+
+  restartBtn.addEventListener('click', () => { ctx(); restart(); });
+  playAgainBtn.addEventListener('click', () => { ctx(); restart(); });
+
+  // Prevent double-tap zoom on iPad/iOS
+  let lastTouch = 0;
+  document.addEventListener('touchend', (e) => {
+    const now = Date.now();
+    if (now - lastTouch <= 300) e.preventDefault();
+    lastTouch = now;
+  }, { passive: false });
+  document.addEventListener('gesturestart', (e) => e.preventDefault());
+
+  restart();
+})();
+</script>
+</body>
+</html>
